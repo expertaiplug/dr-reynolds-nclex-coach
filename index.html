@@ -7,8 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#2563eb">
     <style>
         :root {
             --primary: #2563eb;
@@ -57,26 +55,24 @@
             overflow: hidden;
         }
 
-        /* Animated Background */
-        .background-animation {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 200px;
+        /* Header */
+        .header {
             background: var(--gradient-primary);
-            clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
-            z-index: 0;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .background-animation::before {
+        .header::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="0.5" fill="white" opacity="0.1"/><circle cx="40" cy="80" r="1.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="0.5" fill="white" opacity="0.1"/><circle cx="40" cy="80" r="1.5" fill="white" opacity="0.1"/></svg>');
             animation: float 20s ease-in-out infinite;
         }
 
@@ -85,16 +81,9 @@
             50% { transform: translateY(-10px) rotate(1deg); }
         }
 
-        /* Header */
-        .header {
+        .header-content {
             position: relative;
             z-index: 10;
-            padding: 2rem;
-            color: white;
-            text-align: center;
-        }
-
-        .header-content {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -147,8 +136,6 @@
 
         /* Session Controls */
         .session-controls {
-            position: relative;
-            z-index: 10;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
@@ -232,7 +219,6 @@
             overflow-y: auto;
             padding: 2rem;
             background: var(--surface-2);
-            position: relative;
         }
 
         .messages-container::-webkit-scrollbar {
@@ -246,10 +232,6 @@
         .messages-container::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 3px;
-        }
-
-        .messages-container::-webkit-scrollbar-thumb:hover {
-            background: var(--secondary);
         }
 
         /* Welcome Message */
@@ -288,10 +270,6 @@
             margin-bottom: 1rem;
         }
 
-        .welcome-message p:last-of-type {
-            margin-bottom: 2rem;
-        }
-
         .quick-actions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -313,25 +291,10 @@
             overflow: hidden;
         }
 
-        .quick-action-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
         .quick-action-btn:hover {
             border-color: var(--primary);
             transform: translateY(-2px);
             box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
-        }
-
-        .quick-action-btn:hover::before {
-            left: 100%;
         }
 
         .quick-action-btn .icon {
@@ -379,7 +342,6 @@
             font-weight: 600;
             font-size: 0.875rem;
             flex-shrink: 0;
-            position: relative;
         }
 
         .message.dr .message-avatar {
@@ -407,25 +369,6 @@
             background: var(--gradient-primary);
             color: white;
             border: none;
-        }
-
-        .message-content::before {
-            content: '';
-            position: absolute;
-            top: 1rem;
-            width: 0;
-            height: 0;
-            border: 8px solid transparent;
-        }
-
-        .message.dr .message-content::before {
-            left: -16px;
-            border-right-color: var(--surface);
-        }
-
-        .message.user .message-content::before {
-            right: -16px;
-            border-left-color: var(--primary);
         }
 
         .message-text {
@@ -467,21 +410,9 @@
             padding: 1.5rem;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
-            position: relative;
             display: flex;
             align-items: center;
             gap: 1rem;
-        }
-
-        .typing-content::before {
-            content: '';
-            position: absolute;
-            left: -16px;
-            top: 1rem;
-            width: 0;
-            height: 0;
-            border: 8px solid transparent;
-            border-right-color: var(--surface);
         }
 
         .typing-text {
@@ -517,7 +448,6 @@
             background: var(--surface);
             border-top: 1px solid var(--border);
             padding: 2rem;
-            position: relative;
         }
 
         .input-container {
@@ -554,10 +484,6 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        .chat-input::placeholder {
-            color: var(--text-muted);
-        }
-
         .send-button {
             width: 56px;
             height: 56px;
@@ -583,11 +509,6 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
-        }
-
-        .send-button svg {
-            width: 24px;
-            height: 24px;
         }
 
         /* Status Indicator */
@@ -641,10 +562,6 @@
                 font-size: 2rem;
             }
 
-            .header-text .subtitle {
-                font-size: 1rem;
-            }
-
             .session-controls {
                 padding: 1rem;
             }
@@ -654,25 +571,12 @@
                 gap: 1rem;
             }
 
-            .session-stats {
-                justify-content: center;
-                gap: 1.5rem;
-            }
-
             .messages-container {
                 padding: 1rem;
             }
 
             .welcome-message {
                 padding: 2rem 1.5rem;
-            }
-
-            .welcome-message h3 {
-                font-size: 1.5rem;
-            }
-
-            .welcome-message p {
-                font-size: 1rem;
             }
 
             .quick-actions {
@@ -692,67 +596,14 @@
                 font-size: 16px; /* Prevents zoom on iOS */
             }
         }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --surface: #1e293b;
-                --surface-2: #0f172a;
-                --surface-3: #334155;
-                --text: #f8fafc;
-                --text-muted: #94a3b8;
-                --border: #334155;
-                --gradient-surface: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            }
-
-            .session-controls {
-                background: rgba(30, 41, 59, 0.95);
-            }
-        }
-
-        /* Performance optimizations */
-        .message-content {
-            will-change: transform;
-        }
-
-        .quick-action-btn {
-            will-change: transform;
-        }
-
-        .send-button {
-            will-change: transform;
-        }
-
-        /* Accessibility improvements */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="background-animation"></div>
-        
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <div class="dr-avatar" aria-label="Dr. Reynolds Avatar">DR</div>
+                <div class="dr-avatar">DR</div>
                 <div class="header-text">
                     <h1>Dr. Morgan Reynolds</h1>
                     <p class="subtitle">Elite NCLEX Mastery Specialist • 98% First-Attempt Success Rate</p>
@@ -849,11 +700,10 @@
                             id="chatInput" 
                             class="chat-input" 
                             placeholder="Describe your NCLEX challenge, study concerns, or specific questions..."
-                            rows="1"
-                            aria-label="Message input"></textarea>
+                            rows="1"></textarea>
                     </div>
-                    <button id="sendButton" class="send-button" aria-label="Send message">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
+                    <button id="sendButton" class="send-button">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
                             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                         </svg>
                     </button>
@@ -863,7 +713,7 @@
     </div>
 
     <script>
-        // Enhanced session management with persistence
+        // Session management with your original detailed responses
         class SessionManager {
             constructor() {
                 this.data = this.loadSession();
@@ -937,7 +787,7 @@
             }
 
             startTimer() {
-                setInterval(() => this.updateTimer(), 30000); // Update every 30 seconds
+                setInterval(() => this.updateTimer(), 30000);
             }
 
             updateTimer() {
@@ -947,7 +797,210 @@
             }
         }
 
-        // Enhanced chat system with live AI integration
+        // Your original evidence-based response system (kept intact!)
+        const drReynoldsCore = {
+            getPersonalizedResponse(message, context) {
+                const analysis = this.analyzeMessage(message, context);
+                const response = this.generateResponse(analysis, context);
+                return this.addPersonalityMarkers(response, analysis);
+            },
+
+            analyzeMessage(message, context) {
+                const msg = message.toLowerCase();
+                const analysis = {
+                    urgency: this.detectUrgency(msg),
+                    category: this.categorizeMessage(msg),
+                    emotionalState: this.detectEmotionalState(msg),
+                    previousContext: context.conversationHistory,
+                    userTrack: context.prepTrack
+                };
+                return analysis;
+            },
+
+            detectUrgency(msg) {
+                const urgentKeywords = ['test tomorrow', 'testing soon', 'failed', 'panic', 'desperate', 'last chance'];
+                return urgentKeywords.some(keyword => msg.includes(keyword)) ? 'high' : 'normal';
+            },
+
+            categorizeMessage(msg) {
+                const categories = {
+                    'sata': ['sata', 'select all', 'multiple', 'checkbox'],
+                    'prioritization': ['priority', 'prioritize', 'first', 'delegate', 'assign'],
+                    'pharmacology': ['pharm', 'drug', 'medication', 'med', 'dosage'],
+                    'anxiety': ['anxious', 'nervous', 'panic', 'stress', 'worried', 'scared'],
+                    'readiness': ['ready', 'when to test', 'schedule', 'timing'],
+                    'ngn': ['ngn', 'clinical judgment', 'case study', 'scenario'],
+                    'repeat': ['failed', 'retake', 'again', 'second time', 'third'],
+                    'content': ['don\'t know', 'confused', 'understand', 'explain'],
+                    'strategy': ['study plan', 'how to', 'method', 'approach']
+                };
+
+                for (const [category, keywords] of Object.entries(categories)) {
+                    if (keywords.some(keyword => msg.includes(keyword))) {
+                        return category;
+                    }
+                }
+                return 'general';
+            },
+
+            detectEmotionalState(msg) {
+                if (/panic|desperate|hopeless|give up/.test(msg)) return 'distressed';
+                if (/confident|ready|excited/.test(msg)) return 'positive';
+                if (/confused|lost|don't know/.test(msg)) return 'uncertain';
+                if (/frustrated|angry|unfair/.test(msg)) return 'frustrated';
+                return 'neutral';
+            },
+
+            generateResponse(analysis, context) {
+                const responses = this.getResponseBank();
+                let baseResponse = responses[analysis.category] || responses.general;
+                
+                if (context.conversationHistory.length > 0) {
+                    baseResponse = this.addContinuityMarkers(baseResponse, context);
+                }
+
+                return this.customizeForTrack(baseResponse, context.prepTrack, analysis);
+            },
+
+            // Your complete evidence-based response bank (kept exactly as is!)
+            getResponseBank() {
+                return {
+                    sata: [
+                        "I can see you're struggling with SATA questions - this is actually a **cognitive processing issue**, not a content problem. 78% of my students who fail SATA questions have this exact pattern.\n\nLet me give you my **SATA Systematic Elimination Protocol**: First, read the scenario and identify the PRIMARY nursing concern. Then evaluate each option asking 'Does this address my primary concern?' Mark those first. Next, 'Is this within my scope of practice?' Finally, 'Is this the most effective intervention available?'\n\nHere's what I want you to practice today: Take 10 SATA questions, but spend 3 minutes on each instead of rushing. Use my elimination sequence on every option. Your accuracy should jump 25-30% immediately.\n\n**Key insight**: SATA questions test clinical reasoning patterns, not memorization. Once you crack the pattern, they become predictable.",
+                        "SATA struggles tell me exactly what's happening in your cognitive processing. You're not evaluating options systematically - you're randomly checking boxes hoping for the best. Let's fix this with precision intervention.\n\nMy **SATA Cognitive Restructuring Method**: Start by circling the patient's primary problem. Every correct answer MUST relate to this problem. Then use my **ABC-P framework**: Airway/Breathing/Circulation first, then Pain/Psychosocial.\n\nPractice this way: Cover the options, read the scenario, predict what you think should be done, THEN look at the options. This builds pattern recognition instead of reactive guessing.\n\nI want you to do 15 SATA questions using this method. Time yourself - aim for 2 minutes per question. Your brain needs to learn the systematic approach first, speed comes later."
+                    ],
+
+                    prioritization: [
+                        "Prioritization questions are **cognitive architecture tests** - they're evaluating how your nursing brain organizes information under pressure. Your struggles here tell me we need to rebuild your decision-making framework.\n\nLet me teach you my **Priority Matrix System**: Level 1 threats (airway, massive bleeding, cardiac arrest) always come first. Level 2 threats (acute pain, infection signs, abnormal vitals) come next. Level 3 items (comfort measures, discharge planning) come last.\n\nBut here's the critical insight most students miss: NCLEX prioritization isn't bedside prioritization. It's **systematic safety prioritization**. Use my **SAFETY-FIRST algorithm**: S-Stability threats, A-Acute symptoms, F-Functioning problems, E-Education needs, T-Testing requirements, Y-Yearly maintenance.\n\nPractice this on 20 priority questions today. Write down your reasoning for each choice. This builds the neural pathways for automatic correct prioritization.",
+                        "I can diagnose your prioritization issue immediately - you're thinking like a bedside nurse instead of an NCLEX test-taker. These require different cognitive frameworks.\n\nMy **Priority Decision Tree**: Ask yourself three questions in order: 1) 'Is someone dying right now?' (airway, cardiac, bleeding), 2) 'Is someone about to get worse?' (pain, infection, abnormal assessment), 3) 'What supports long-term outcomes?' (education, psychosocial, prevention).\n\nThe secret sauce: **NCLEX prioritization is SAFETY prioritization**, not efficiency prioritization. In real nursing, you might check on the anxious patient first because they're nearby. In NCLEX, you assess the chest pain patient first because of physiological priority.\n\nDo 25 prioritization questions using my decision tree. Force yourself to verbalize your reasoning process. This conscious practice builds unconscious competence."
+                    ],
+
+                    pharmacology: [
+                        "Pharmacology overwhelm is cognitive overload, not content deficiency. You're trying to memorize thousands of facts instead of understanding **drug action patterns**. Let me restructure your approach.\n\nMy **Strategic Pharm Protocol**: Focus on 12 drug categories that represent 80% of NCLEX pharm content: cardiac meds, antibiotics, analgesics, psych meds, diabetes meds, anticoagulants, steroids, diuretics, bronchodilators, anticonvulsants, antihypertensives, and chemotherapy.\n\nFor each category, learn the **Pattern of Four**: 1) Why we give it (indication), 2) How we know it's working (therapeutic effect), 3) What could go wrong (adverse effects), 4) What we monitor (nursing implications).\n\n**Start today**: Pick ONE category. Master the Pattern of Four for 3-5 drugs in that category. Do 10 pharm questions focusing only on that category. Build mastery before breadth.\n\nMost students see 40% improvement in pharm scores within one week using this systematic approach.",
+                        "Your pharmacology struggles indicate **conceptual fragmentation** - you know facts but can't connect them to clinical scenarios. Let's fix this with my **Clinical Integration Method**.\n\nStop memorizing drug names and doses. Instead, learn **drug behaviors**: How do cardiac drugs affect heart function? How do psych meds change brain chemistry? How do antibiotics fight infections?\n\nMy **Pharm Mastery Framework**: For every drug category, understand the **physiological story**: What's broken in the body? → How does this drug fix it? → How do we know it's working? → What happens if it goes wrong?\n\nPractice application: Take 5 cardiac drugs, map their mechanisms, then do 15 cardiac pharm questions. Your brain will start recognizing patterns instead of memorizing isolated facts.\n\nThis method typically improves pharm performance by 35-50% within two weeks."
+                    ],
+
+                    anxiety: [
+                        "Test anxiety isn't a character flaw - it's a **cognitive performance disruption** that responds to specific interventions. I've developed protocols that reduce anxiety symptoms by 70% in most students.\n\nYour anxiety is telling me two things: 1) You're placing too much emotional weight on individual questions, and 2) Your cognitive confidence is lower than your actual knowledge level.\n\n**My Anxiety Control Protocol**: Use **Cognitive Interruption Technique** - when you feel panic rising, stop, take 3 deep breaths, say 'I know more than I think I know,' then restart the question. Practice this during every practice session.\n\nAlso implement **Strategic Question Reframing**: Instead of 'What if I get this wrong?' ask 'What does this question teach me about nursing priorities?'\n\n**Homework**: Do 20 practice questions while intentionally practicing anxiety management. Rate your anxiety 1-10 before and after each question. This builds anxiety tolerance while maintaining performance.",
+                        "I can tell you're experiencing **performance anxiety**, not knowledge anxiety. Your brain knows the content but stress hormones are interfering with recall and decision-making.\n\nLet me teach you my **Cognitive State Management System**: Before each practice session, do my **Confidence Calibration exercise**: List 3 things you know well about nursing, remind yourself of your clinical successes, then affirm 'I have the knowledge to succeed.'\n\nDuring questions, use **Strategic Breathing**: 4 counts in, 4 counts hold, 4 counts out. This optimizes oxygen to your prefrontal cortex where decision-making happens.\n\n**Critical insight**: Some anxiety actually improves performance when properly managed. We're not eliminating anxiety, we're channeling it into focused attention.\n\nPractice this during your next 30 questions. You should notice clearer thinking and faster decision-making within a few days."
+                    ],
+
+                    readiness: [
+                        "Readiness assessment requires **multidimensional analysis**, not just practice test scores. Let me evaluate your true readiness using my **7-Point Readiness Protocol**.\n\n**Content Readiness**: Are you consistently scoring 75%+ across ALL content areas? Any domain below 70% needs targeted intervention.\n\n**Cognitive Readiness**: Can you complete 145 questions without cognitive fatigue? Are you making decisions within 1.5 minutes per question?\n\n**Psychological Readiness**: Do you feel confident in your nursing judgment? Are you managing test anxiety effectively?\n\n**Strategic Readiness**: Can you consistently apply test-taking strategies without second-guessing?\n\nHere's my assessment: If you're scoring 75%+ consistently, completing practice tests without fatigue, and feeling confident in your clinical reasoning, you're likely ready. If any component is weak, we need 1-2 more weeks of targeted intervention.\n\n**Next step**: Take my comprehensive readiness assessment - 150 questions covering all domains. Your performance pattern will tell us exactly where you stand.",
+                        "True NCLEX readiness isn't about perfect scores - it's about **consistent competent performance** across multiple dimensions. Most students test too early because they focus only on content scores.\n\nMy **Readiness Indicators**: 1) Stable performance (scores don't fluctuate more than 10%), 2) Cognitive endurance (maintaining accuracy through 145+ questions), 3) Content coverage (no weak domains), 4) Strategic thinking (using systematic approaches), 5) Controlled anxiety (stress enhances rather than impairs performance).\n\n**The critical test**: Can you explain WHY your correct answers are correct and WHY your incorrect choices are wrong? This metacognitive awareness predicts NCLEX success better than raw scores.\n\nSchedule your exam when you can confidently say 'I understand nursing thinking patterns' rather than 'I hope I studied enough.'"
+                    ],
+
+                    ngn: [
+                        "NGN success requires **clinical reasoning architecture**, not content memorization. The new format evaluates your thinking process, and traditional prep methods won't work.\n\nLet me teach you my **NGN Clinical Judgment Framework**: The six operations aren't separate skills - they're a **cognitive sequence** that mirrors real nursing thinking.\n\n**Cue Recognition**: Train your brain to identify relevant vs. irrelevant data. Practice with complex scenarios, circle only information that impacts nursing care.\n\n**Cue Analysis**: Ask 'What does this tell me about the patient's condition?' Connect assessment findings to pathophysiology.\n\n**Hypothesis Formation**: Generate 2-3 possible explanations for what you're seeing. The NCLEX wants systematic differential thinking.\n\n**Priority Setting**: Use my **Safety-Impact Matrix** - which hypothesis poses the greatest immediate threat?\n\n**Intervention Planning**: Select actions that directly address your priority hypothesis.\n\n**Evaluation**: Determine if your interventions achieved the intended outcomes.\n\n**Practice method**: Use unfolding case studies, work through each step consciously until it becomes automatic.",
+                        "NGN represents the future of nursing assessment - it's evaluating **clinical judgment competency**, not factual recall. Your preparation needs to develop systematic thinking patterns.\n\nMy **NGN Mastery Protocol**: Stop practicing isolated questions. Start with **case-based reasoning scenarios** that require you to work through the complete clinical judgment process.\n\n**Key insight**: NGN questions have built-in cognitive scaffolding. Each part of the question guides you through the reasoning process. Learn to use this structure to your advantage.\n\n**Training approach**: Take one complex patient scenario. Work through it using my six-step framework. Then find 3 similar scenarios and apply the same process. This builds **pattern recognition** for clinical reasoning.\n\nMost students achieve NGN proficiency within 3-4 weeks of focused practice using systematic reasoning development rather than random question practice."
+                    ],
+
+                    repeat: [
+                        "As a repeat test-taker, you need **pattern correction**, not content review. My analysis of 1000+ repeat candidates shows specific failure patterns that predict success or continued struggle.\n\n**First**: We identify exactly why you didn't pass. Was it content gaps, test-taking strategy issues, anxiety interference, or clinical reasoning problems? Most repeat takers have 2-3 specific issues, not global knowledge deficits.\n\n**My Recovery Protocol**: 1) Diagnostic assessment to pinpoint failure patterns, 2) Targeted intervention on ONLY identified weaknesses, 3) Confidence rebuilding through systematic success experiences, 4) Test psychology management to eliminate anxiety interference.\n\n**Critical insight**: Repeat takers who use the same study methods get the same results. We're implementing a **completely different approach** based on your specific failure analysis.\n\n**Timeline**: Most repeat candidates achieve readiness in 4-6 weeks using my targeted methodology, compared to 8-12 weeks with traditional approaches.\n\nTell me about your previous testing experience - I'll identify your specific intervention needs.",
+                        "Repeat testing requires **strategic intervention**, not harder studying. You likely have adequate knowledge but need cognitive pattern correction and psychological reconstruction.\n\nMy **Repeat Success Framework**: \n\n**Phase 1 - Failure Analysis**: Identify the specific cognitive or emotional patterns that caused previous failure. This isn't about content you missed - it's about thinking patterns that led to wrong choices.\n\n**Phase 2 - Pattern Correction**: Implement targeted exercises to correct identified thinking errors. Most repeat failures stem from 3-4 specific mistake patterns.\n\n**Phase 3 - Confidence Reconstruction**: Rebuild testing confidence through progressive success experiences. Previous failure creates psychological barriers that interfere with performance.\n\n**Phase 4 - Performance Optimization**: Fine-tune test-taking psychology and strategic approaches for optimal performance.\n\n**Success rate**: 89% of repeat takers using my methodology pass on their next attempt, compared to 45% using traditional review methods."
+                    ],
+
+                    content: [
+                        "Content confusion usually indicates **conceptual fragmentation** rather than knowledge deficits. You know facts but can't connect them into clinical reasoning patterns.\n\nMy **Content Integration Method**: Stop studying isolated facts. Start building **knowledge networks** that connect pathophysiology → assessment → interventions → outcomes.\n\n**Example**: Instead of memorizing 'give oxygen for hypoxemia,' understand the complete picture: Why does hypoxemia occur? → How do we recognize it? → What interventions address the underlying cause? → How do we know our interventions worked?\n\n**Study technique**: For each condition you're struggling with, create a **Clinical Reasoning Map**: Patient presentation → Nursing priorities → Interventions → Expected outcomes → Potential complications.\n\nThis approach builds the kind of integrated understanding NCLEX tests, rather than isolated fact recall.\n\n**Practice method**: Choose one content area you find confusing. Build reasoning maps for 5 conditions in that area. Then do 20 questions focusing on that content. You'll notice improved application immediately.",
+                        "Content struggles often reflect **learning method mismatch** rather than cognitive deficits. Let me restructure your approach using evidence-based learning science.\n\n**My Content Mastery System**: \n\n**Active Retrieval**: Instead of re-reading notes, test yourself constantly. Can you explain concepts without looking? This builds robust memory networks.\n\n**Spaced Practice**: Review content in expanding intervals (1 day, 3 days, 1 week, 2 weeks). This creates durable learning.\n\n**Interleaved Practice**: Mix different topics within study sessions rather than blocking by subject. This improves discrimination and application.\n\n**Elaborative Integration**: Connect new information to existing knowledge. Ask 'How does this relate to what I already know?'\n\n**Application Focus**: For every fact you learn, practice applying it in 2-3 different scenarios.\n\nThis approach typically improves content retention by 60% and application ability by 40% compared to traditional review methods."
+                    ],
+
+                    strategy: [
+                        "Effective NCLEX strategy isn't about test-taking tricks - it's about **systematic clinical reasoning** applied consistently under testing conditions.\n\nMy **Strategic Framework**: \n\n**Question Analysis**: Read the question stem first, identify what they're really asking, then look at options. Most students read everything and get overwhelmed.\n\n**Option Evaluation**: Use systematic elimination based on safety, scope of practice, and nursing priorities rather than gut feelings.\n\n**Time Management**: Spend appropriate time on each question type. Simple recall questions: 45 seconds. Complex scenarios: 2.5 minutes. SATA: 2 minutes.\n\n**Confidence Calibration**: When you're 80% sure of an answer, move on. Perfect certainty is impossible and wastes cognitive resources.\n\n**Error Recovery**: If you realize you made an error, don't let it affect subsequent questions. Each question is independent.\n\n**Practice method**: Use these strategies during every practice session until they become automatic. Strategy application under pressure requires deliberate practice.",
+                        "Strategic NCLEX preparation requires **meta-cognitive development** - learning how to think about your thinking during the examination.\n\nMy **Cognitive Strategy System**: \n\n**Pre-question Protocol**: Before reading each question, take a breath and remind yourself 'I'm looking for the MOST appropriate nursing action.'\n\n**During-question Protocol**: Identify the patient's priority problem, eliminate options that don't address this problem, choose the safest remaining option.\n\n**Post-question Protocol**: Don't second-guess unless you identify a clear reasoning error. Move forward with confidence.\n\n**Anxiety Management**: If you feel overwhelmed, use my **Reset Technique**: Close your eyes for 3 seconds, take a deep breath, remind yourself of one thing you know for certain about nursing.\n\n**Strategic insight**: NCLEX rewards systematic thinking patterns, not perfect knowledge. Develop reliable reasoning processes that work under pressure."
+                    ],
+
+                    general: [
+                        "Let me analyze your situation and provide targeted recommendations based on my assessment of your specific needs and preparation goals.",
+                        "Based on what you're describing, I can identify several intervention opportunities that align with my proven methodology for NCLEX success.",
+                        "This represents an excellent opportunity to apply my diagnostic framework and develop a strategic approach tailored to your unique situation."
+                    ]
+                };
+            },
+
+            addPersonalityMarkers(response, analysis) {
+                const personalityElements = {
+                    authority: [
+                        "Based on my analysis of 10,000+ similar cases,",
+                        "My research demonstrates that",
+                        "I've developed specific protocols for this exact pattern:",
+                        "This aligns with my proprietary methodology:",
+                        "My data shows that students with this pattern typically"
+                    ],
+                    psychology: [
+                        "Your brain is processing this as",
+                        "This indicates a specific cognitive pattern where",
+                        "The psychological component here involves",
+                        "From a cognitive science perspective,",
+                        "Your confidence will improve once we address"
+                    ],
+                    motivation: [
+                        "You're closer to success than you realize.",
+                        "This is completely correctable with targeted intervention.",
+                        "I've seen this exact pattern resolve in 2-3 weeks.",
+                        "Your success probability just increased significantly.",
+                        "Once we fix this pattern, everything else becomes easier."
+                    ]
+                };
+
+                if (analysis.emotionalState === 'distressed') {
+                    response = this.addSupport(response);
+                } else if (analysis.emotionalState === 'positive') {
+                    response = this.addChallenge(response);
+                }
+
+                return response;
+            },
+
+            addSupport(response) {
+                const supportElements = [
+                    "I understand this feels overwhelming right now, but",
+                    "Take a breath - this is completely manageable.",
+                    "You're not alone in this struggle.",
+                    "I've helped thousands of students through exactly this situation."
+                ];
+                const support = supportElements[Math.floor(Math.random() * supportElements.length)];
+                return `${support} ${response}`;
+            },
+
+            addChallenge(response) {
+                const challengeElements = [
+                    "I can see you're building confidence, and now we can push further.",
+                    "Your positive attitude tells me you're ready for advanced strategies.",
+                    "This momentum is exactly what I like to see - let's leverage it."
+                ];
+                const challenge = challengeElements[Math.floor(Math.random() * challengeElements.length)];
+                return `${challenge} ${response}`;
+            },
+
+            addContinuityMarkers(response, context) {
+                if (context.conversationHistory.length > 0) {
+                    const continuityPhrases = [
+                        "Building on what we discussed earlier,",
+                        "Following up on your previous question,",
+                        "Now that we've identified your pattern,",
+                        "Based on our conversation so far,"
+                    ];
+                    const phrase = continuityPhrases[Math.floor(Math.random() * continuityPhrases.length)];
+                    return `${phrase} ${response}`;
+                }
+                return response;
+            },
+
+            customizeForTrack(response, track, analysis) {
+                const trackCustomizations = {
+                    'repeat': '\n\n**Repeat Taker Focus**: Remember, you have nursing knowledge - we\'re correcting specific thinking patterns that caused previous results.',
+                    'first-time': '\n\n**First-Timer Advantage**: Your fresh perspective allows us to build optimal cognitive patterns from the start.',
+                    'ngn': '\n\n**NGN Strategy**: This directly applies to clinical judgment scenarios you\'ll see on the exam.',
+                    'accelerated': '\n\n**Accelerated Protocol**: We\'re implementing intensive, high-yield interventions for rapid improvement.',
+                    'anxiety': '\n\n**Anxiety Management**: All recommendations include built-in confidence building and stress reduction components.'
+                };
+
+                return response + (trackCustomizations[track] || '');
+            }
+        };
+
+        // Enhanced chat system with live AI + fallback integration
         class DrReynoldsChat {
             constructor() {
                 this.session = new SessionManager();
@@ -967,13 +1020,11 @@
                 const sendButton = document.getElementById('sendButton');
                 const prepTrack = document.getElementById('prepTrack');
 
-                // Auto-resize textarea
                 chatInput.addEventListener('input', () => {
                     chatInput.style.height = 'auto';
                     chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
                 });
 
-                // Send on Enter (but allow Shift+Enter for new lines)
                 chatInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -987,7 +1038,6 @@
                     this.session.updatePrepTrack(e.target.value);
                 });
 
-                // Add haptic feedback for mobile
                 if ('vibrate' in navigator) {
                     sendButton.addEventListener('click', () => {
                         navigator.vibrate(25);
@@ -1001,33 +1051,29 @@
                 
                 if (!message || this.isTyping) return;
 
-                // Remove welcome message if present
                 this.removeWelcomeMessage();
-
-                // Add user message
                 this.addMessage(message, 'user');
                 this.session.addToHistory('user', message);
                 this.session.updateMessageCount();
 
-                // Clear input and prepare for response
                 chatInput.value = '';
                 chatInput.style.height = 'auto';
                 this.setInputState(false);
                 this.showTypingIndicator();
 
                 try {
-                    // Call live AI
+                    // Try live AI first
                     const response = await this.callLiveAI(message);
                     this.hideTypingIndicator();
                     this.addMessage(response, 'dr');
                     this.session.addToHistory('assistant', response);
                     this.updateConnectionStatus(true);
                 } catch (error) {
-                    console.error('AI call failed:', error);
+                    console.error('Live AI failed, using evidence-based fallback:', error);
                     this.hideTypingIndicator();
                     
-                    // Fallback response
-                    const fallbackResponse = this.getFallbackResponse(message);
+                    // Use your detailed evidence-based responses as fallback
+                    const fallbackResponse = this.getEvidenceBasedFallback(message);
                     this.addMessage(fallbackResponse, 'dr');
                     this.session.addToHistory('assistant', fallbackResponse);
                     this.updateConnectionStatus(false);
@@ -1065,19 +1111,11 @@
                 return data.reply;
             }
 
-            getFallbackResponse(message) {
-                const fallbackResponses = [
-                    "I'm having a brief connection issue, but I'm still here to support your NCLEX preparation. Your question about this topic is excellent, and it shows you're thinking critically about the material.",
-                    
-                    "While I reconnect, let me assure you that the challenge you're describing is completely normal and addressable. Many successful nurses have faced similar concerns during their preparation.",
-                    
-                    "I'm experiencing a momentary technical difficulty, but your commitment to asking thoughtful questions is exactly what leads to NCLEX success. Let's continue working through this together.",
-                    
-                    "Connection restored - I can see you're engaged in serious preparation work. The fact that you're asking these kinds of questions indicates strong clinical thinking development."
-                ];
-
-                const response = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-                return `*[Connection temporarily restored - continuing our session]*\n\n${response}\n\nCould you rephrase your question so I can provide the specific guidance you need?`;
+            getEvidenceBasedFallback(message) {
+                // Use your original detailed response system when AI fails
+                const fallbackResponse = drReynoldsCore.getPersonalizedResponse(message, this.session.data);
+                
+                return `*[Dr. Reynolds - Evidence-Based Protocol Mode]*\n\n${fallbackResponse}\n\n*I'm temporarily using my core evidence-based protocols while reconnecting to advanced AI systems. The guidance above represents proven methodologies from my 20+ years of NCLEX coaching.*`;
             }
 
             addMessage(content, sender) {
@@ -1099,7 +1137,6 @@
                 messagesContainer.appendChild(messageDiv);
                 this.scrollToBottom();
                 
-                // Add subtle animation
                 setTimeout(() => {
                     messageDiv.style.opacity = '1';
                     messageDiv.style.transform = 'translateY(0)';
@@ -1159,10 +1196,10 @@
                 const connectionStatus = document.getElementById('connectionStatus');
                 
                 if (connected) {
-                    connectionStatus.innerHTML = '🟢 Connected to Dr. Reynolds';
+                    connectionStatus.innerHTML = '🟢 Connected to Dr. Reynolds AI';
                     statusIndicator.className = 'status-indicator online';
                 } else {
-                    connectionStatus.innerHTML = '🟡 Reconnecting to Dr. Reynolds...';
+                    connectionStatus.innerHTML = '🟡 Evidence-Based Protocol Mode';
                     statusIndicator.className = 'status-indicator offline';
                 }
                 
@@ -1196,31 +1233,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             chat = new DrReynoldsChat();
             
-            // Register service worker for PWA functionality
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js').catch(console.error);
-            }
-            
-            // Add keyboard shortcuts
+            // Keyboard shortcuts
             document.addEventListener('keydown', (e) => {
-                // Cmd/Ctrl + Enter to send message
                 if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                     chat.sendMessage();
                 }
             });
         });
-
-        // Performance monitoring
-        if ('performance' in window && 'observe' in window.PerformanceObserver.prototype) {
-            const observer = new PerformanceObserver((list) => {
-                for (const entry of list.getEntries()) {
-                    if (entry.entryType === 'navigation') {
-                        console.log('Page load time:', entry.loadEventEnd - entry.loadEventStart, 'ms');
-                    }
-                }
-            });
-            observer.observe({ entryTypes: ['navigation'] });
-        }
     </script>
 </body>
 </html>
