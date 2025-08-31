@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://js.stripe.com/v3/"></script>
+    <!-- Stripe.js will be loaded via Netlify snippet injection -->
     <style>
         :root {
             --primary: #2563eb;
@@ -679,7 +679,7 @@
                                 <span>Priority email support</span>
                             </div>
                         </div>
-                        <button class="btn" style="width: 100%; background: var(--accent); color: white; font-size: 1.1rem; padding: 1rem;" onclick="upgradeToPremium()">
+                        <button data-upgrade="premium" class="btn" style="width: 100%; background: var(--accent); color: white; font-size: 1.1rem; padding: 1rem;">
                             Start 7-Day Free Trial
                         </button>
                     </div>
@@ -727,7 +727,7 @@
                 <div class="question-card" style="text-align: center; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none;">
                     <h3 style="margin-bottom: 1rem; color: white;">🔒 Risk-Free Guarantee</h3>
                     <p style="font-size: 1.1rem; margin-bottom: 1.5rem; opacity: 0.9;">Try Premium free for 7 days. If you don't see improvement, get a full refund within 30 days.</p>
-                    <button class="btn" style="background: white; color: var(--success); font-size: 1.2rem; padding: 1rem 2rem; font-weight: 700;" onclick="upgradeToPremium()">
+                    <button data-upgrade="premium" class="btn" style="background: white; color: var(--success); font-size: 1.2rem; padding: 1rem 2rem; font-weight: 700;">
                         Start Your Free Trial Now
                     </button>
                     <p style="font-size: 0.9rem; margin-top: 1rem; opacity: 0.8;">No credit card required • Cancel anytime</p>
@@ -764,18 +764,8 @@
             questionsRemaining: 10 // Free users get 10 questions
         };
         
-        // Stripe Configuration
-        // SETUP INSTRUCTIONS:
-        // 1. Replace STRIPE_PUBLISHABLE_KEY with your actual Stripe publishable key from your Stripe dashboard
-        // 2. Replace BACKEND_URL with your backend server URL
-        // 3. Replace 'price_YOUR_STRIPE_PRICE_ID' with your actual Stripe Price ID for the $29.99/month plan
-        // 4. Set up your backend to handle /create-checkout-session endpoint (see backend code below)
-        
-        const STRIPE_PUBLISHABLE_KEY = 'pk_test_YOUR_PUBLISHABLE_KEY_HERE'; // Replace with your key
-        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-        
-        // Your backend endpoint for creating payment sessions
-        const BACKEND_URL = 'https://your-backend.com'; // Replace with your backend URL
+        // Stripe will be configured via Netlify snippet injection
+        // This keeps your keys secure and separate from your code
         
         // Sample questions with categories
         const questions = [
@@ -1334,64 +1324,12 @@
                     <p style="color: var(--text-muted); margin-bottom: 2rem;">You've completed all ${userSubscription.questionsRemaining} free questions. Upgrade to Premium for unlimited practice!</p>
                     <div style="display: flex; gap: 1rem; justify-content: center;">
                         <button onclick="this.parentElement.parentElement.parentElement.remove()" class="btn btn-secondary">Maybe Later</button>
-                        <button onclick="upgradeToPremium()" class="btn" style="background: var(--accent); color: white;">Upgrade Now</button>
+                        <button data-upgrade="premium" class="btn" style="background: var(--accent); color: white;">Upgrade Now</button>
                     </div>
                 </div>
             `;
             
             document.body.appendChild(upgradeModal);
-        }
-        
-        async function upgradeToPremium() {
-            try {
-                // Show loading state
-                const upgradeButtons = document.querySelectorAll('button[onclick="upgradeToPremium()"]');
-                upgradeButtons.forEach(btn => {
-                    btn.disabled = true;
-                    btn.innerHTML = '⏳ Processing...';
-                });
-                
-                // Create checkout session on your backend
-                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        priceId: 'price_YOUR_STRIPE_PRICE_ID', // Replace with your Stripe Price ID
-                        successUrl: window.location.href + '?success=true',
-                        cancelUrl: window.location.href + '?canceled=true',
-                        customerEmail: null, // You can collect email if needed
-                        trialPeriodDays: 7 // 7-day free trial
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to create checkout session');
-                }
-                
-                const session = await response.json();
-                
-                // Redirect to Stripe Checkout
-                const result = await stripe.redirectToCheckout({
-                    sessionId: session.id
-                });
-                
-                if (result.error) {
-                    throw new Error(result.error.message);
-                }
-                
-            } catch (error) {
-                console.error('Payment error:', error);
-                alert('❌ Payment Error\n\nSorry, there was an issue processing your payment. Please try again or contact support.');
-                
-                // Reset button states
-                const upgradeButtons = document.querySelectorAll('button[onclick="upgradeToPremium()"]');
-                upgradeButtons.forEach(btn => {
-                    btn.disabled = false;
-                    btn.innerHTML = btn.innerHTML.includes('Start') ? 'Start 7-Day Free Trial' : 'Upgrade Now';
-                });
-            }
         }
         
         // Check for successful payment on page load
@@ -1530,5 +1468,5 @@
             });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9779470c15883105',t:'MTc1NjYwOTIyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9779a06bd421f8cf',t:'MTc1NjYxMjg4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
