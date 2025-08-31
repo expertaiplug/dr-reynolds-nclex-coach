@@ -1,4 +1,3 @@
-
 <script src="https://js.stripe.com/v3/"></script>
 <script>
   const STRIPE_PUBLISHABLE_KEY = 'pk_live_YOUR_ACTUAL_KEY';
@@ -18,7 +17,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          priceId: 'price_YOUR_ACTUAL_PRICE_ID',
+          priceId: 'price_1S22ULGdLQZ5sGelD8tanK8r',
           successUrl: window.location.origin + '?success=true',
           cancelUrl: window.location.origin + '?canceled=true',
           trialPeriodDays: 7
