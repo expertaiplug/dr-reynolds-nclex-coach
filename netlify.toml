@@ -1,77 +1,66 @@
 # Netlify configuration for Dr. Reynolds NCLEX Coach
 
 [build]
-  # No build command needed for this static site
   publish = "."
+  functions = "netlify/functions"   # ✅ correct place for the functions dir
 
 [functions]
-  # Function configuration
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
+  node_bundler = "esbuild"          # ✅ function settings live here
 
+# Ensure function requests are never caught by SPA redirect
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# SPA fallback for everything else (keep this LAST)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ---- headers (unchanged) ----
 [[headers]]
-  # Headers for the main site
   for = "/*"
   [headers.values]
-    # Security headers
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    
-    # Performance headers
     Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
-  # Headers for HTML pages (different caching)
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
-  # Headers for static assets
   for = "/manifest.json"
   [headers.values]
     Cache-Control = "public, max-age=31536000"
 
 [[headers]]
-  # Headers for service worker
   for = "/sw.js"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
     Service-Worker-Allowed = "/"
 
 [[headers]]
-  # Headers for fonts
   for = "*.woff2"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-[[redirects]]
-  # SPA fallback (in case of future routing)
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Role = ["admin"], Country = ["!China"]}
-
-# Environment variables (for reference - set these in Netlify dashboard)
-# CLAUDE_API_KEY = "your-claude-api-key-here"
-
 [dev]
-  # Local development settings
   command = "npx netlify dev"
   port = 8888
   autoLaunch = true
 
 [context.production]
-  # Production-specific settings
   environment = { NODE_ENV = "production" }
 
 [context.deploy-preview]
-  # Deploy preview settings
   environment = { NODE_ENV = "staging" }
 
 [context.branch-deploy]
-  # Branch deploy settings
   environment = { NODE_ENV = "development" }
