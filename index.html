@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -46,7 +47,7 @@
         .app-container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             max-width: 1200px;
             margin: 0 auto;
             background: var(--surface);
@@ -55,24 +56,26 @@
             overflow: hidden;
         }
 
-        /* Header */
-        .header {
+        /* Animated Background */
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
             background: var(--gradient-primary);
-            color: white;
-            padding: 2rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 70%, 0 100%);
+            z-index: 0;
         }
 
-        .header::before {
+        .background-animation::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="0.5" fill="white" opacity="0.1"/><circle cx="40" cy="80" r="1.5" fill="white" opacity="0.1"/></svg>');
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="0.5" fill="white" opacity="0.1"/><circle cx="40" cy="80" r="1.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
             animation: float 20s ease-in-out infinite;
         }
 
@@ -81,9 +84,16 @@
             50% { transform: translateY(-10px) rotate(1deg); }
         }
 
-        .header-content {
+        /* Header */
+        .header {
             position: relative;
             z-index: 10;
+            padding: 2rem;
+            color: white;
+            text-align: center;
+        }
+
+        .header-content {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -102,451 +112,285 @@
             font-size: 1.5rem;
             font-weight: 700;
             color: white;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            position: relative;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-
-        .dr-avatar::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent);
             animation: pulse 2s ease-in-out infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.05); }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .header-text h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .header-text .subtitle {
-            font-size: 1.125rem;
+        .header-text p {
+            font-size: 1.1rem;
             opacity: 0.9;
-            font-weight: 400;
         }
 
-        /* Session Controls */
-        .session-controls {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            padding: 1.5rem 2rem;
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            position: relative;
+            z-index: 5;
         }
 
-        .controls-grid {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .prep-track-section {
+        /* Navigation Tabs */
+        .nav-tabs {
             display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
         }
 
-        .prep-track-label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .prep-track-select {
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            background: var(--surface);
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
             font-size: 1rem;
             font-weight: 500;
-            color: var(--text);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .prep-track-select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .session-stats {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
             color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 500;
-        }
-
-        /* Chat Container */
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 2rem;
-            background: var(--surface-2);
-        }
-
-        .messages-container::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .messages-container::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .messages-container::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 3px;
-        }
-
-        /* Welcome Message */
-        .welcome-message {
-            background: var(--surface);
-            border-radius: 24px;
-            padding: 3rem;
-            text-align: center;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .welcome-message::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--gradient-primary);
-        }
-
-        .welcome-message h3 {
-            font-size: 1.875rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 1rem;
-        }
-
-        .welcome-message p {
-            font-size: 1.125rem;
-            line-height: 1.6;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-        }
-
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .quick-action-btn {
-            background: var(--surface);
-            border: 2px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-align: left;
             cursor: pointer;
+            border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
-            font-size: 0.975rem;
-            line-height: 1.5;
-            position: relative;
-            overflow: hidden;
         }
 
-        .quick-action-btn:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
         }
 
-        .quick-action-btn .icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+        .nav-tab:hover {
+            color: var(--primary);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        .quick-action-btn .title {
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 0.25rem;
-            display: block;
-        }
-
-        .quick-action-btn .description {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
-
-        /* Messages */
-        .message {
-            margin-bottom: 2rem;
-            display: flex;
-            gap: 1rem;
-            animation: slideIn 0.4s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .message.user {
-            flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.875rem;
-            flex-shrink: 0;
-        }
-
-        .message.dr .message-avatar {
-            background: var(--gradient-primary);
-            color: white;
-        }
-
-        .message.user .message-avatar {
-            background: var(--surface-3);
-            color: var(--text);
-            border: 2px solid var(--border);
-        }
-
-        .message-content {
-            max-width: 75%;
+        /* Question Card */
+        .question-card {
             background: var(--surface);
-            border-radius: 20px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            position: relative;
-        }
-
-        .message.user .message-content {
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-        }
-
-        .message-text {
-            line-height: 1.6;
-            font-size: 1rem;
-        }
-
-        .message-text strong {
-            font-weight: 600;
-        }
-
-        .message-text em {
-            font-style: italic;
-            color: var(--accent);
-        }
-
-        .message-time {
-            font-size: 0.75rem;
-            opacity: 0.6;
-            margin-top: 0.75rem;
-            font-weight: 500;
-        }
-
-        /* Typing Indicator */
-        .typing-indicator {
-            display: none;
-            margin-bottom: 2rem;
-            gap: 1rem;
-            animation: slideIn 0.4s ease-out;
-        }
-
-        .typing-indicator.show {
-            display: flex;
-        }
-
-        .typing-content {
-            background: var(--surface);
-            border-radius: 20px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .typing-text {
-            color: var(--text-muted);
-            font-style: italic;
-            font-size: 0.975rem;
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--primary);
-            animation: bounce 1.4s ease-in-out infinite;
-        }
-
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        .typing-dot:nth-child(3) { animation-delay: 0s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-            40% { transform: scale(1.2); opacity: 1; }
-        }
-
-        /* Input Area */
-        .input-area {
-            background: var(--surface);
-            border-top: 1px solid var(--border);
+            border-radius: 16px;
             padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
         }
 
-        .input-container {
+        .question-header {
             display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-number {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .question-category {
+            background: var(--surface-2);
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            color: var(--text);
+        }
+
+        .answer-options {
+            display: flex;
+            flex-direction: column;
             gap: 1rem;
-            align-items: flex-end;
-            max-width: 100%;
+            margin-bottom: 2rem;
         }
 
-        .input-wrapper {
-            flex: 1;
-            position: relative;
-        }
-
-        .chat-input {
-            width: 100%;
-            min-height: 56px;
-            max-height: 120px;
+        .answer-option {
             padding: 1rem 1.5rem;
             border: 2px solid var(--border);
-            border-radius: 28px;
-            font-size: 1rem;
-            line-height: 1.5;
-            resize: none;
-            background: var(--surface);
-            color: var(--text);
-            font-family: inherit;
-            transition: all 0.2s ease;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .send-button {
-            width: 56px;
-            height: 56px;
-            border: none;
-            border-radius: 50%;
-            background: var(--gradient-primary);
-            color: white;
+            border-radius: 12px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--surface);
+        }
+
+        .answer-option:hover {
+            border-color: var(--primary);
+            background: var(--surface-2);
+        }
+
+        .answer-option.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .answer-option.correct {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .answer-option.incorrect {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-3);
+        }
+
+        /* Progress Section */
+        .progress-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .progress-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow);
-            flex-shrink: 0;
+            font-size: 1.5rem;
         }
 
-        .send-button:hover:not(:disabled) {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        .progress-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
 
-        .send-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Status Indicator */
-        .status-indicator {
-            position: absolute;
-            top: -2rem;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 0.75rem;
+        .progress-label {
             color: var(--text-muted);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            font-size: 0.9rem;
         }
 
-        .status-indicator.show {
-            opacity: 1;
+        /* Study Plan */
+        .study-plan {
+            display: grid;
+            gap: 1rem;
         }
 
-        .status-indicator.online {
-            color: var(--success);
+        .study-item {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
-        .status-indicator.offline {
-            color: var(--warning);
+        .study-item-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
-        /* Mobile Responsive */
+        .study-item-content {
+            flex: 1;
+        }
+
+        .study-item-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .study-item-description {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Explanation */
+        .explanation {
+            background: var(--surface-2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .explanation h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .app-container {
-                height: 100vh;
-                border-radius: 0;
-            }
-
-            .header {
-                padding: 1.5rem 1rem;
-            }
-
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
@@ -555,691 +399,1136 @@
             .dr-avatar {
                 width: 60px;
                 height: 60px;
-                font-size: 1.25rem;
+                font-size: 1.2rem;
             }
 
             .header-text h1 {
-                font-size: 2rem;
+                font-size: 1.5rem;
             }
 
-            .session-controls {
+            .main-content {
                 padding: 1rem;
             }
 
-            .controls-grid {
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .question-actions {
+                flex-direction: column;
+            }
+
+            .progress-section {
                 grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .messages-container {
-                padding: 1rem;
-            }
-
-            .welcome-message {
-                padding: 2rem 1.5rem;
-            }
-
-            .quick-actions {
-                grid-template-columns: 1fr;
-            }
-
-            .message-content {
-                max-width: 85%;
-                padding: 1.25rem;
-            }
-
-            .input-area {
-                padding: 1rem;
-            }
-
-            .chat-input {
-                font-size: 16px; /* Prevents zoom on iOS */
             }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
+        <div class="background-animation"></div>
+        
         <header class="header">
             <div class="header-content">
                 <div class="dr-avatar">DR</div>
                 <div class="header-text">
-                    <h1>Dr. Morgan Reynolds</h1>
-                    <p class="subtitle">Elite NCLEX Mastery Specialist • 98% First-Attempt Success Rate</p>
+                    <h1>Dr. Reynolds NCLEX Coach</h1>
+                    <p>Your personalized path to NCLEX success</p>
                 </div>
             </div>
         </header>
 
-        <!-- Session Controls -->
-        <div class="session-controls">
-            <div class="controls-grid">
-                <div class="prep-track-section">
-                    <label for="prepTrack" class="prep-track-label">Your Preparation Track</label>
-                    <select id="prepTrack" class="prep-track-select">
-                        <option value="assessment">🔍 Initial Assessment & Strategy</option>
-                        <option value="first-time">🎯 First-Time Test Taker</option>
-                        <option value="repeat">🔄 Repeat Test Taker Protocol</option>
-                        <option value="ngn">🧠 NGN Clinical Judgment Mastery</option>
-                        <option value="accelerated">⚡ Accelerated Recovery Program</option>
-                        <option value="anxiety">😰 Test Anxiety Management</option>
-                        <option value="content">📚 Content Mastery Focus</option>
-                        <option value="strategy">🎲 Strategic Test-Taking Skills</option>
-                    </select>
-                </div>
-                
-                <div class="session-stats">
-                    <div class="stat-item">
-                        <span class="stat-value" id="messageCount">0</span>
-                        <span class="stat-label">Messages</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="sessionTime">0m</span>
-                        <span class="stat-label">Session</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <main class="main-content">
+            <nav class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('practice')">Practice Questions</button>
+                <button class="nav-tab" onclick="showTab('progress')">Progress</button>
+                <button class="nav-tab" onclick="showTab('study-plan')">Study Plan</button>
+                <button class="nav-tab" onclick="showTab('upgrade')" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; border-radius: 8px; margin-left: auto;">✨ Upgrade</button>
+            </nav>
 
-        <!-- Chat Container -->
-        <div class="chat-container">
-            <div class="messages-container" id="messagesContainer">
-                <!-- Welcome Message -->
-                <div class="welcome-message" id="welcomeMessage">
-                    <h3>👋 Welcome! I'm Dr. Reynolds</h3>
-                    <p><strong>Ready to create your personalized NCLEX success strategy?</strong></p>
-                    <p>I've guided thousands of nursing students to pass with my evidence-based protocols and clinical reasoning frameworks.</p>
-                    <p><em>Whether you're a first-timer or need a strategic comeback, let's identify exactly what you need to succeed.</em></p>
+            <!-- Practice Questions Tab -->
+            <div id="practice" class="tab-content active">
+                <div class="question-card">
+                    <div class="question-header">
+                        <div class="question-number" id="questionNumber">Question 1 of 3</div>
+                        <div class="question-category" id="questionCategory">Pharmacology</div>
+                    </div>
                     
-                    <div class="quick-actions">
-                        <button class="quick-action-btn" onclick="quickStart('I failed NCLEX and need to figure out exactly what went wrong and how to fix it')">
-                            <span class="icon">💪</span>
-                            <span class="title">Failed NCLEX - Need Strategy</span>
-                            <span class="description">Comprehensive failure analysis and recovery protocol</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="quickStart('I struggle with SATA questions and always second-guess myself')">
-                            <span class="icon">🎯</span>
-                            <span class="title">SATA Question Mastery</span>
-                            <span class="description">Systematic approach to Select All That Apply</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="quickStart('How do I know when I am ready to take the NCLEX? What are the signs?')">
-                            <span class="icon">⏰</span>
-                            <span class="title">Readiness Assessment</span>
-                            <span class="description">Multi-dimensional readiness evaluation</span>
-                        </button>
-                        <button class="quick-action-btn" onclick="quickStart('I get anxious during practice tests and my mind goes blank')">
-                            <span class="icon">🧘‍♀️</span>
-                            <span class="title">Test Anxiety Control</span>
-                            <span class="description">Cognitive performance optimization</span>
-                        </button>
+                    <div class="question-text" id="questionText">
+                        A nurse is preparing to administer digoxin 0.25 mg PO to a client. Before administering the medication, which assessment is most important for the nurse to perform?
+                    </div>
+                    
+                    <div class="answer-options" id="answerOptions">
+                        <div class="answer-option" onclick="selectAnswer(this, 0)">
+                            A) Check the client's blood pressure
+                        </div>
+                        <div class="answer-option" onclick="selectAnswer(this, 1)">
+                            B) Assess the client's respiratory rate
+                        </div>
+                        <div class="answer-option" onclick="selectAnswer(this, 2)">
+                            C) Monitor the client's apical pulse for 1 minute
+                        </div>
+                        <div class="answer-option" onclick="selectAnswer(this, 3)">
+                            D) Evaluate the client's level of consciousness
+                        </div>
+                    </div>
+                    
+                    <div class="question-actions">
+                        <button class="btn btn-secondary" onclick="previousQuestion()">Previous</button>
+                        <button class="btn btn-primary" onclick="submitAnswer()" id="submitBtn" disabled>Submit Answer</button>
+                        <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn" style="display: none;">Next Question</button>
+                    </div>
+                    
+                    <div id="explanation" class="explanation" style="display: none;">
+                        <h4>💡 Explanation</h4>
+                        <p>Before administering digoxin, the nurse must assess the apical pulse for 1 full minute. Digoxin is a cardiac glycoside that can cause bradycardia and other cardiac arrhythmias. If the pulse rate is below 60 bpm in adults, the medication should be withheld and the healthcare provider notified.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Typing Indicator -->
-            <div class="typing-indicator" id="typingIndicator">
-                <div class="message-avatar">DR</div>
-                <div class="typing-content">
-                    <span class="typing-text">Dr. Reynolds is analyzing your question...</span>
-                    <div class="typing-dots">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
+            <!-- Progress Tab -->
+            <div id="progress" class="tab-content">
+                <div class="progress-section">
+                    <div class="progress-card">
+                        <div class="progress-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">📊</div>
+                        <div class="progress-value" style="color: var(--warning);" id="overallScore">0%</div>
+                        <div class="progress-label">Overall Score</div>
+                    </div>
+                    
+                    <div class="progress-card">
+                        <div class="progress-icon" style="background: rgba(37, 99, 235, 0.1); color: var(--primary);">🎯</div>
+                        <div class="progress-value" style="color: var(--primary);" id="questionsCompleted">0</div>
+                        <div class="progress-label">Questions Completed</div>
+                    </div>
+                    
+                    <div class="progress-card">
+                        <div class="progress-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">⚡</div>
+                        <div class="progress-value" style="color: var(--success);" id="currentStreak">0</div>
+                        <div class="progress-label">Current Streak</div>
+                    </div>
+                    
+                    <div class="progress-card">
+                        <div class="progress-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">🏆</div>
+                        <div class="progress-value" style="color: #8b5cf6;" id="passProbability">--</div>
+                        <div class="progress-label">Pass Probability</div>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h3 style="margin-bottom: 1.5rem;">📈 Performance by Category</h3>
+                    <div style="display: grid; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--surface-2); border-radius: 8px;" id="pharmacology-progress">
+                            <span>Pharmacology</span>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="width: 100px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 0%; height: 100%; background: var(--warning);" class="progress-bar"></div>
+                                </div>
+                                <span style="font-weight: 600; color: var(--text-muted);" class="category-score">--</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--surface-2); border-radius: 8px;" id="medical-surgical-progress">
+                            <span>Medical-Surgical</span>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="width: 100px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 0%; height: 100%; background: var(--success);" class="progress-bar"></div>
+                                </div>
+                                <span style="font-weight: 600; color: var(--text-muted);" class="category-score">--</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--surface-2); border-radius: 8px;" id="pediatrics-progress">
+                            <span>Pediatrics</span>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="width: 100px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 0%; height: 100%; background: var(--danger);" class="progress-bar"></div>
+                                </div>
+                                <span style="font-weight: 600; color: var(--text-muted);" class="category-score">--</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--surface-2); border-radius: 8px;" id="mental-health-progress">
+                            <span>Mental Health</span>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="width: 100px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 0%; height: 100%; background: var(--danger);" class="progress-bar"></div>
+                                </div>
+                                <span style="font-weight: 600; color: var(--text-muted);" class="category-score">--</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--surface-2); border-radius: 8px;" id="maternity-progress">
+                            <span>Maternity</span>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="width: 100px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 0%; height: 100%; background: var(--success);" class="progress-bar"></div>
+                                </div>
+                                <span style="font-weight: 600; color: var(--text-muted);" class="category-score">--</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--surface-2); border-radius: 8px;" id="community-health-progress">
+                            <span>Community Health</span>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="width: 100px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;">
+                                    <div style="width: 0%; height: 100%; background: var(--warning);" class="progress-bar"></div>
+                                </div>
+                                <span style="font-weight: 600; color: var(--text-muted);" class="category-score">--</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Input Area -->
-            <div class="input-area">
-                <div class="status-indicator" id="statusIndicator">
-                    <span id="connectionStatus">🟢 Connected to Dr. Reynolds</span>
-                </div>
-                <div class="input-container">
-                    <div class="input-wrapper">
-                        <textarea 
-                            id="chatInput" 
-                            class="chat-input" 
-                            placeholder="Describe your NCLEX challenge, study concerns, or specific questions..."
-                            rows="1"></textarea>
+            <!-- Study Plan Tab -->
+            <div id="study-plan" class="tab-content">
+                <div class="question-card">
+                    <h3 style="margin-bottom: 1.5rem;">📅 Personalized Study Plan</h3>
+                    <div class="study-plan" id="studyPlanContainer">
+                        <!-- Dynamic study plan will be inserted here -->
                     </div>
-                    <button id="sendButton" class="send-button">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                        </svg>
+                </div>
+
+                <div class="question-card">
+                    <h3 style="margin-bottom: 1.5rem;">🎯 Focus Areas Based on Your Performance</h3>
+                    <div style="display: grid; gap: 1rem;" id="focusAreasContainer">
+                        <!-- Dynamic focus areas will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upgrade Tab -->
+            <div id="upgrade" class="tab-content">
+                <div class="question-card" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">✨</div>
+                    <h2 style="margin-bottom: 1rem; color: white;">Unlock Your Full NCLEX Potential</h2>
+                    <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 2rem;">Join thousands of nursing students who've passed with Dr. Reynolds Premium</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+                    <!-- Free Plan -->
+                    <div class="question-card" style="position: relative;">
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--text-muted);">Free Plan</h3>
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--text-muted); margin: 1rem 0;">$0</div>
+                            <div style="color: var(--text-muted);">Current Plan</div>
+                        </div>
+                        <div style="display: grid; gap: 0.75rem; margin-bottom: 2rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--success);">✓</span>
+                                <span>10 practice questions</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--success);">✓</span>
+                                <span>Basic progress tracking</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--success);">✓</span>
+                                <span>6 NCLEX categories</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--danger);">✗</span>
+                                <span style="color: var(--text-muted);">Unlimited questions</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--danger);">✗</span>
+                                <span style="color: var(--text-muted);">Detailed explanations</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--danger);">✗</span>
+                                <span style="color: var(--text-muted);">Performance analytics</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Premium Plan -->
+                    <div class="question-card" style="position: relative; border: 3px solid var(--accent); box-shadow: 0 8px 32px rgba(245, 158, 11, 0.2);">
+                        <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">MOST POPULAR</div>
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--accent);">Premium Plan</h3>
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--accent); margin: 1rem 0;">$29.99<span style="font-size: 1rem; font-weight: 400;">/month</span></div>
+                            <div style="color: var(--text-muted);">Everything you need to pass</div>
+                        </div>
+                        <div style="display: grid; gap: 0.75rem; margin-bottom: 2rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--success);">✓</span>
+                                <span><strong>Unlimited practice questions</strong></span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--success);">✓</span>
+                                <span><strong>2,500+ NCLEX-style questions</strong></span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--success);">✓</span>
+                                <span>Detailed explanations & rationales</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--success);">✓</span>
+                                <span>Advanced performance analytics</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--success);">✓</span>
+                                <span>Personalized study plans</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--success);">✓</span>
+                                <span>Timed practice exams</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--success);">✓</span>
+                                <span>Priority email support</span>
+                            </div>
+                        </div>
+                        <button class="btn" style="width: 100%; background: var(--accent); color: white; font-size: 1.1rem; padding: 1rem;" onclick="upgradeToPremium()">
+                            Start 7-Day Free Trial
+                        </button>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h3 style="margin-bottom: 1.5rem; text-align: center;">🎯 Why Students Choose Premium</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📈</div>
+                            <h4 style="margin-bottom: 0.5rem;">94% Pass Rate</h4>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Premium users have a 94% first-time pass rate vs 87% national average</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚡</div>
+                            <h4 style="margin-bottom: 0.5rem;">Save 40+ Hours</h4>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">AI-powered study plans focus on your weak areas, not wasted time</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🏆</div>
+                            <h4 style="margin-bottom: 0.5rem;">Confidence Boost</h4>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Walk into your NCLEX knowing you're fully prepared</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-card" style="background: var(--surface-2);">
+                    <h3 style="margin-bottom: 1.5rem; text-align: center;">💬 What Students Say</h3>
+                    <div style="display: grid; gap: 1.5rem;">
+                        <div style="background: var(--surface); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--success);">
+                            <p style="font-style: italic; margin-bottom: 1rem;">"I passed on my first try! The unlimited questions and detailed explanations made all the difference. Worth every penny!"</p>
+                            <div style="font-weight: 600; color: var(--success);">- Sarah M., RN</div>
+                        </div>
+                        <div style="background: var(--surface); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--primary);">
+                            <p style="font-style: italic; margin-bottom: 1rem;">"The personalized study plan helped me focus on my weak areas. I went from 65% to 85% in just 3 weeks!"</p>
+                            <div style="font-weight: 600; color: var(--primary);">- Michael R., RN</div>
+                        </div>
+                        <div style="background: var(--surface); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--accent);">
+                            <p style="font-style: italic; margin-bottom: 1rem;">"Dr. Reynolds Premium gave me the confidence I needed. The practice exams felt just like the real NCLEX!"</p>
+                            <div style="font-weight: 600; color: var(--accent);">- Jessica L., RN</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-card" style="text-align: center; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none;">
+                    <h3 style="margin-bottom: 1rem; color: white;">🔒 Risk-Free Guarantee</h3>
+                    <p style="font-size: 1.1rem; margin-bottom: 1.5rem; opacity: 0.9;">Try Premium free for 7 days. If you don't see improvement, get a full refund within 30 days.</p>
+                    <button class="btn" style="background: white; color: var(--success); font-size: 1.2rem; padding: 1rem 2rem; font-weight: 700;" onclick="upgradeToPremium()">
+                        Start Your Free Trial Now
                     </button>
+                    <p style="font-size: 0.9rem; margin-top: 1rem; opacity: 0.8;">No credit card required • Cancel anytime</p>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script>
-        // Session management with your original detailed responses
-        class SessionManager {
-            constructor() {
-                this.data = this.loadSession();
-                this.initializeUI();
-                this.startTimer();
+        let selectedAnswer = null;
+        let currentQuestion = 1;
+        let totalQuestions = 10;
+        
+        // Progress tracking
+        let userProgress = {
+            totalAnswered: 0,
+            correctAnswers: 0,
+            categoryStats: {
+                'Pharmacology': { correct: 0, total: 0 },
+                'Medical-Surgical': { correct: 0, total: 0 },
+                'Pediatrics': { correct: 0, total: 0 },
+                'Mental Health': { correct: 0, total: 0 },
+                'Maternity': { correct: 0, total: 0 },
+                'Community Health': { correct: 0, total: 0 }
+            },
+            streak: 0,
+            lastCorrect: false
+        };
+        
+        // User subscription status
+        let userSubscription = {
+            isPremium: false,
+            trialDaysLeft: 0,
+            questionsRemaining: 10 // Free users get 10 questions
+        };
+        
+        // Stripe Configuration
+        // SETUP INSTRUCTIONS:
+        // 1. Replace STRIPE_PUBLISHABLE_KEY with your actual Stripe publishable key from your Stripe dashboard
+        // 2. Replace BACKEND_URL with your backend server URL
+        // 3. Replace 'price_YOUR_STRIPE_PRICE_ID' with your actual Stripe Price ID for the $29.99/month plan
+        // 4. Set up your backend to handle /create-checkout-session endpoint (see backend code below)
+        
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_YOUR_PUBLISHABLE_KEY_HERE'; // Replace with your key
+        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        
+        // Your backend endpoint for creating payment sessions
+        const BACKEND_URL = 'https://your-backend.com'; // Replace with your backend URL
+        
+        // Sample questions with categories
+        const questions = [
+            {
+                category: 'Pharmacology',
+                question: "A nurse is preparing to administer digoxin 0.25 mg PO to a client. Before administering the medication, which assessment is most important for the nurse to perform?",
+                options: [
+                    "A) Check the client's blood pressure",
+                    "B) Assess the client's respiratory rate", 
+                    "C) Monitor the client's apical pulse for 1 minute",
+                    "D) Evaluate the client's level of consciousness"
+                ],
+                correct: 2,
+                explanation: "Before administering digoxin, the nurse must assess the apical pulse for 1 full minute. Digoxin is a cardiac glycoside that can cause bradycardia and other cardiac arrhythmias. If the pulse rate is below 60 bpm in adults, the medication should be withheld and the healthcare provider notified."
+            },
+            {
+                category: 'Mental Health',
+                question: "A client with depression tells the nurse, 'I feel like ending it all.' What is the nurse's priority response?",
+                options: [
+                    "A) 'You shouldn't feel that way, things will get better'",
+                    "B) 'Tell me more about these feelings you're having'",
+                    "C) 'Have you thought about how you would hurt yourself?'",
+                    "D) 'Let me call your family to come visit you'"
+                ],
+                correct: 2,
+                explanation: "When a client expresses suicidal ideation, the nurse's priority is to assess the immediacy of risk by determining if the client has a specific plan. This direct assessment helps determine the level of intervention needed."
+            },
+            {
+                category: 'Pediatrics',
+                question: "A 2-year-old child is admitted with suspected epiglottitis. Which nursing action should be avoided?",
+                options: [
+                    "A) Maintaining the child in an upright position",
+                    "B) Examining the child's throat with a tongue depressor",
+                    "C) Monitoring oxygen saturation continuously",
+                    "D) Keeping the child calm and comfortable"
+                ],
+                correct: 1,
+                explanation: "Examining the throat of a child with suspected epiglottitis can precipitate complete airway obstruction. The inflamed epiglottis can spasm and block the airway if manipulated."
+            },
+            {
+                category: 'Medical-Surgical',
+                question: "A client is recovering from abdominal surgery. Which finding would indicate the development of paralytic ileus?",
+                options: [
+                    "A) Hyperactive bowel sounds",
+                    "B) Absence of bowel sounds with abdominal distention",
+                    "C) Cramping abdominal pain",
+                    "D) Frequent loose stools"
+                ],
+                correct: 1,
+                explanation: "Paralytic ileus is characterized by absent bowel sounds and abdominal distention due to decreased intestinal motility following surgery or other conditions."
+            },
+            {
+                category: 'Maternity',
+                question: "A pregnant client at 32 weeks gestation reports decreased fetal movement. What is the nurse's priority action?",
+                options: [
+                    "A) Reassure the client that this is normal",
+                    "B) Schedule a routine prenatal appointment",
+                    "C) Perform a non-stress test immediately",
+                    "D) Advise the client to drink cold fluids"
+                ],
+                correct: 2,
+                explanation: "Decreased fetal movement can indicate fetal compromise. A non-stress test should be performed immediately to assess fetal well-being."
+            },
+            {
+                category: 'Community Health',
+                question: "A community health nurse is planning a vaccination program. Which population should receive priority for influenza vaccination?",
+                options: [
+                    "A) Healthy adults aged 18-49",
+                    "B) Children over 12 years old",
+                    "C) Adults over 65 and those with chronic conditions",
+                    "D) Healthcare workers only"
+                ],
+                correct: 2,
+                explanation: "Adults over 65 and individuals with chronic conditions are at highest risk for influenza complications and should receive priority for vaccination."
+            },
+            {
+                category: 'Pharmacology',
+                question: "A client is prescribed warfarin. Which laboratory value should the nurse monitor most closely?",
+                options: [
+                    "A) Platelet count",
+                    "B) International Normalized Ratio (INR)",
+                    "C) Hemoglobin level",
+                    "D) White blood cell count"
+                ],
+                correct: 1,
+                explanation: "INR is the most important laboratory value to monitor for clients taking warfarin to ensure therapeutic anticoagulation and prevent bleeding complications."
+            },
+            {
+                category: 'Mental Health',
+                question: "A client with bipolar disorder is experiencing a manic episode. Which intervention is most appropriate?",
+                options: [
+                    "A) Encourage group activities",
+                    "B) Provide a stimulating environment",
+                    "C) Set consistent limits and boundaries",
+                    "D) Allow unlimited visitors"
+                ],
+                correct: 2,
+                explanation: "During a manic episode, clients need consistent limits and boundaries to help control impulsive behavior and maintain safety."
+            },
+            {
+                category: 'Pediatrics',
+                question: "A 6-month-old infant is brought to the clinic for a well-child visit. Which developmental milestone should the nurse expect?",
+                options: [
+                    "A) Walking independently",
+                    "B) Sitting without support",
+                    "C) Speaking in two-word phrases",
+                    "D) Toilet training readiness"
+                ],
+                correct: 1,
+                explanation: "By 6 months, infants should be able to sit without support. Walking typically occurs around 12 months, and speech development comes later."
+            },
+            {
+                category: 'Medical-Surgical',
+                question: "A client with diabetes mellitus has a blood glucose of 45 mg/dL. Which symptom would the nurse expect to observe?",
+                options: [
+                    "A) Polyuria and polydipsia",
+                    "B) Confusion and diaphoresis",
+                    "C) Kussmaul respirations",
+                    "D) Fruity breath odor"
+                ],
+                correct: 1,
+                explanation: "A blood glucose of 45 mg/dL indicates hypoglycemia. Symptoms include confusion, diaphoresis, shakiness, and altered mental status."
             }
+        ];
 
-            loadSession() {
-                try {
-                    const saved = localStorage.getItem('drReynoldsSession');
-                    if (saved) {
-                        const data = JSON.parse(saved);
-                        data.startTime = new Date(data.startTime);
-                        return data;
-                    }
-                } catch (e) {
-                    console.log('Starting fresh session');
-                }
-
-                return {
-                    messageCount: 0,
-                    startTime: new Date(),
-                    conversationHistory: [],
-                    prepTrack: 'assessment',
-                    studentName: null,
-                    preferences: {}
-                };
+        // Initialize the app
+        function initializeApp() {
+            // Load saved subscription status
+            const savedSubscription = localStorage.getItem('userSubscription');
+            if (savedSubscription) {
+                userSubscription = { ...userSubscription, ...JSON.parse(savedSubscription) };
             }
-
-            saveSession() {
-                try {
-                    localStorage.setItem('drReynoldsSession', JSON.stringify(this.data));
-                } catch (e) {
-                    console.log('Session save failed, continuing in memory');
-                }
+            
+            // Load saved progress
+            const savedProgress = localStorage.getItem('userProgress');
+            if (savedProgress) {
+                userProgress = { ...userProgress, ...JSON.parse(savedProgress) };
             }
+            
+            totalQuestions = questions.length;
+            loadQuestion();
+            updateProgressDisplay();
+            updateQuestionCounter();
+            updatePremiumStatus();
+            
+            // Check for payment status on page load
+            checkPaymentStatus();
+        }
+        
+        // Save progress to localStorage
+        function saveProgress() {
+            localStorage.setItem('userProgress', JSON.stringify(userProgress));
+            localStorage.setItem('userSubscription', JSON.stringify(userSubscription));
+        }
+        
+        function loadQuestion() {
+            const question = questions[currentQuestion - 1];
+            document.getElementById('questionNumber').textContent = `Question ${currentQuestion} of ${totalQuestions}`;
+            document.getElementById('questionCategory').textContent = question.category;
+            document.getElementById('questionText').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('answerOptions');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'answer-option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectAnswer(optionDiv, index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Update explanation
+            document.getElementById('explanation').innerHTML = `
+                <h4>💡 Explanation</h4>
+                <p>${question.explanation}</p>
+            `;
+        }
 
-            updateMessageCount() {
-                this.data.messageCount++;
-                document.getElementById('messageCount').textContent = this.data.messageCount;
-                this.saveSession();
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+            
+            // Update progress when viewing progress tab
+            if (tabName === 'progress') {
+                updateProgressDisplay();
             }
-
-            updatePrepTrack(track) {
-                this.data.prepTrack = track;
-                this.saveSession();
-            }
-
-            addToHistory(role, content) {
-                this.data.conversationHistory.push({
-                    role,
-                    content,
-                    timestamp: new Date().toISOString()
-                });
-                this.saveSession();
-            }
-
-            getRecentHistory(limit = 6) {
-                return this.data.conversationHistory
-                    .slice(-limit)
-                    .map(msg => ({
-                        role: msg.role,
-                        content: msg.content
-                    }));
-            }
-
-            initializeUI() {
-                document.getElementById('prepTrack').value = this.data.prepTrack;
-                document.getElementById('messageCount').textContent = this.data.messageCount;
-                this.updateTimer();
-            }
-
-            startTimer() {
-                setInterval(() => this.updateTimer(), 30000);
-            }
-
-            updateTimer() {
-                const now = new Date();
-                const diffMinutes = Math.floor((now - this.data.startTime) / (1000 * 60));
-                document.getElementById('sessionTime').textContent = `${diffMinutes}m`;
+            
+            // Update study plan when viewing study plan tab
+            if (tabName === 'study-plan') {
+                updateStudyPlan();
             }
         }
 
-        // Your original evidence-based response system (kept intact!)
-        const drReynoldsCore = {
-            getPersonalizedResponse(message, context) {
-                const analysis = this.analyzeMessage(message, context);
-                const response = this.generateResponse(analysis, context);
-                return this.addPersonalityMarkers(response, analysis);
-            },
+        function selectAnswer(element, answerIndex) {
+            // Remove previous selections
+            document.querySelectorAll('.answer-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Select current answer
+            element.classList.add('selected');
+            selectedAnswer = { element, answerIndex };
+            
+            // Enable submit button
+            document.getElementById('submitBtn').disabled = false;
+        }
 
-            analyzeMessage(message, context) {
-                const msg = message.toLowerCase();
-                const analysis = {
-                    urgency: this.detectUrgency(msg),
-                    category: this.categorizeMessage(msg),
-                    emotionalState: this.detectEmotionalState(msg),
-                    previousContext: context.conversationHistory,
-                    userTrack: context.prepTrack
-                };
-                return analysis;
-            },
-
-            detectUrgency(msg) {
-                const urgentKeywords = ['test tomorrow', 'testing soon', 'failed', 'panic', 'desperate', 'last chance'];
-                return urgentKeywords.some(keyword => msg.includes(keyword)) ? 'high' : 'normal';
-            },
-
-            categorizeMessage(msg) {
-                const categories = {
-                    'sata': ['sata', 'select all', 'multiple', 'checkbox'],
-                    'prioritization': ['priority', 'prioritize', 'first', 'delegate', 'assign'],
-                    'pharmacology': ['pharm', 'drug', 'medication', 'med', 'dosage'],
-                    'anxiety': ['anxious', 'nervous', 'panic', 'stress', 'worried', 'scared'],
-                    'readiness': ['ready', 'when to test', 'schedule', 'timing'],
-                    'ngn': ['ngn', 'clinical judgment', 'case study', 'scenario'],
-                    'repeat': ['failed', 'retake', 'again', 'second time', 'third'],
-                    'content': ['don\'t know', 'confused', 'understand', 'explain'],
-                    'strategy': ['study plan', 'how to', 'method', 'approach']
-                };
-
-                for (const [category, keywords] of Object.entries(categories)) {
-                    if (keywords.some(keyword => msg.includes(keyword))) {
-                        return category;
-                    }
+        function submitAnswer() {
+            if (!selectedAnswer) return;
+            
+            const currentQ = questions[currentQuestion - 1];
+            const isCorrect = selectedAnswer.answerIndex === currentQ.correct;
+            
+            // Update progress tracking
+            userProgress.totalAnswered++;
+            if (isCorrect) {
+                userProgress.correctAnswers++;
+                userProgress.streak++;
+                userProgress.lastCorrect = true;
+            } else {
+                userProgress.streak = 0;
+                userProgress.lastCorrect = false;
+            }
+            
+            // Update category stats
+            const category = currentQ.category;
+            userProgress.categoryStats[category].total++;
+            if (isCorrect) {
+                userProgress.categoryStats[category].correct++;
+            }
+            
+            // Show correct/incorrect styling
+            document.querySelectorAll('.answer-option').forEach((option, index) => {
+                option.style.pointerEvents = 'none';
+                if (index === currentQ.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedAnswer.answerIndex && !isCorrect) {
+                    option.classList.add('incorrect');
                 }
-                return 'general';
-            },
+            });
+            
+            // Show explanation
+            document.getElementById('explanation').style.display = 'block';
+            
+            // Hide submit button, show next button
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            
+            // Update progress display
+            updateProgressDisplay();
+            
+            // Save progress
+            saveProgress();
+        }
 
-            detectEmotionalState(msg) {
-                if (/panic|desperate|hopeless|give up/.test(msg)) return 'distressed';
-                if (/confident|ready|excited/.test(msg)) return 'positive';
-                if (/confused|lost|don't know/.test(msg)) return 'uncertain';
-                if (/frustrated|angry|unfair/.test(msg)) return 'frustrated';
-                return 'neutral';
-            },
+        function nextQuestion() {
+            // Check if user has reached their question limit
+            if (!userSubscription.isPremium && userProgress.totalAnswered >= userSubscription.questionsRemaining) {
+                showUpgradePrompt();
+                return;
+            }
+            
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++;
+                resetQuestion();
+                loadQuestion();
+            } else {
+                // Generate more questions for premium users
+                if (userSubscription.isPremium) {
+                    generateMoreQuestions();
+                    currentQuestion++;
+                    resetQuestion();
+                    loadQuestion();
+                } else {
+                    const overallScore = Math.round((userProgress.correctAnswers / userProgress.totalAnswered) * 100);
+                    alert(`🎉 Congratulations! You've completed this practice session.\n\nYour Score: ${overallScore}%\nCorrect: ${userProgress.correctAnswers}/${userProgress.totalAnswered}\nCurrent Streak: ${userProgress.streak}\n\nUpgrade to Premium for unlimited questions!`);
+                }
+            }
+        }
 
-            generateResponse(analysis, context) {
-                const responses = this.getResponseBank();
-                let baseResponse = responses[analysis.category] || responses.general;
+        function previousQuestion() {
+            if (currentQuestion > 1) {
+                currentQuestion--;
+                resetQuestion();
+                loadQuestion();
+            }
+        }
+
+        function resetQuestion() {
+            // Reset answer options
+            document.querySelectorAll('.answer-option').forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+                option.style.pointerEvents = 'auto';
+            });
+            
+            // Reset buttons
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            // Hide explanation
+            document.getElementById('explanation').style.display = 'none';
+            
+            selectedAnswer = null;
+        }
+        
+        function updateProgressDisplay() {
+            // Update main progress cards
+            const overallScore = userProgress.totalAnswered > 0 ? 
+                Math.round((userProgress.correctAnswers / userProgress.totalAnswered) * 100) : 0;
+            
+            document.getElementById('overallScore').textContent = `${overallScore}%`;
+            document.getElementById('questionsCompleted').textContent = userProgress.totalAnswered;
+            document.getElementById('currentStreak').textContent = userProgress.streak;
+            
+            // Calculate pass probability (simplified formula)
+            let passProbability = '--';
+            if (userProgress.totalAnswered >= 3) {
+                const baseScore = Math.min(overallScore + 10, 95); // Add 10% buffer, cap at 95%
+                passProbability = `${baseScore}%`;
+            }
+            document.getElementById('passProbability').textContent = passProbability;
+            
+            // Update category progress bars
+            Object.keys(userProgress.categoryStats).forEach(category => {
+                const stats = userProgress.categoryStats[category];
+                const categoryId = category.toLowerCase().replace(/[^a-z]/g, '-');
+                const progressElement = document.getElementById(`${categoryId}-progress`);
                 
-                if (context.conversationHistory.length > 0) {
-                    baseResponse = this.addContinuityMarkers(baseResponse, context);
-                }
-
-                return this.customizeForTrack(baseResponse, context.prepTrack, analysis);
-            },
-
-            // Your complete evidence-based response bank (kept exactly as is!)
-            getResponseBank() {
-                return {
-                    sata: [
-                        "I can see you're struggling with SATA questions - this is actually a **cognitive processing issue**, not a content problem. 78% of my students who fail SATA questions have this exact pattern.\n\nLet me give you my **SATA Systematic Elimination Protocol**: First, read the scenario and identify the PRIMARY nursing concern. Then evaluate each option asking 'Does this address my primary concern?' Mark those first. Next, 'Is this within my scope of practice?' Finally, 'Is this the most effective intervention available?'\n\nHere's what I want you to practice today: Take 10 SATA questions, but spend 3 minutes on each instead of rushing. Use my elimination sequence on every option. Your accuracy should jump 25-30% immediately.\n\n**Key insight**: SATA questions test clinical reasoning patterns, not memorization. Once you crack the pattern, they become predictable.",
-                        "SATA struggles tell me exactly what's happening in your cognitive processing. You're not evaluating options systematically - you're randomly checking boxes hoping for the best. Let's fix this with precision intervention.\n\nMy **SATA Cognitive Restructuring Method**: Start by circling the patient's primary problem. Every correct answer MUST relate to this problem. Then use my **ABC-P framework**: Airway/Breathing/Circulation first, then Pain/Psychosocial.\n\nPractice this way: Cover the options, read the scenario, predict what you think should be done, THEN look at the options. This builds pattern recognition instead of reactive guessing.\n\nI want you to do 15 SATA questions using this method. Time yourself - aim for 2 minutes per question. Your brain needs to learn the systematic approach first, speed comes later."
-                    ],
-
-                    prioritization: [
-                        "Prioritization questions are **cognitive architecture tests** - they're evaluating how your nursing brain organizes information under pressure. Your struggles here tell me we need to rebuild your decision-making framework.\n\nLet me teach you my **Priority Matrix System**: Level 1 threats (airway, massive bleeding, cardiac arrest) always come first. Level 2 threats (acute pain, infection signs, abnormal vitals) come next. Level 3 items (comfort measures, discharge planning) come last.\n\nBut here's the critical insight most students miss: NCLEX prioritization isn't bedside prioritization. It's **systematic safety prioritization**. Use my **SAFETY-FIRST algorithm**: S-Stability threats, A-Acute symptoms, F-Functioning problems, E-Education needs, T-Testing requirements, Y-Yearly maintenance.\n\nPractice this on 20 priority questions today. Write down your reasoning for each choice. This builds the neural pathways for automatic correct prioritization.",
-                        "I can diagnose your prioritization issue immediately - you're thinking like a bedside nurse instead of an NCLEX test-taker. These require different cognitive frameworks.\n\nMy **Priority Decision Tree**: Ask yourself three questions in order: 1) 'Is someone dying right now?' (airway, cardiac, bleeding), 2) 'Is someone about to get worse?' (pain, infection, abnormal assessment), 3) 'What supports long-term outcomes?' (education, psychosocial, prevention).\n\nThe secret sauce: **NCLEX prioritization is SAFETY prioritization**, not efficiency prioritization. In real nursing, you might check on the anxious patient first because they're nearby. In NCLEX, you assess the chest pain patient first because of physiological priority.\n\nDo 25 prioritization questions using my decision tree. Force yourself to verbalize your reasoning process. This conscious practice builds unconscious competence."
-                    ],
-
-                    pharmacology: [
-                        "Pharmacology overwhelm is cognitive overload, not content deficiency. You're trying to memorize thousands of facts instead of understanding **drug action patterns**. Let me restructure your approach.\n\nMy **Strategic Pharm Protocol**: Focus on 12 drug categories that represent 80% of NCLEX pharm content: cardiac meds, antibiotics, analgesics, psych meds, diabetes meds, anticoagulants, steroids, diuretics, bronchodilators, anticonvulsants, antihypertensives, and chemotherapy.\n\nFor each category, learn the **Pattern of Four**: 1) Why we give it (indication), 2) How we know it's working (therapeutic effect), 3) What could go wrong (adverse effects), 4) What we monitor (nursing implications).\n\n**Start today**: Pick ONE category. Master the Pattern of Four for 3-5 drugs in that category. Do 10 pharm questions focusing only on that category. Build mastery before breadth.\n\nMost students see 40% improvement in pharm scores within one week using this systematic approach.",
-                        "Your pharmacology struggles indicate **conceptual fragmentation** - you know facts but can't connect them to clinical scenarios. Let's fix this with my **Clinical Integration Method**.\n\nStop memorizing drug names and doses. Instead, learn **drug behaviors**: How do cardiac drugs affect heart function? How do psych meds change brain chemistry? How do antibiotics fight infections?\n\nMy **Pharm Mastery Framework**: For every drug category, understand the **physiological story**: What's broken in the body? → How does this drug fix it? → How do we know it's working? → What happens if it goes wrong?\n\nPractice application: Take 5 cardiac drugs, map their mechanisms, then do 15 cardiac pharm questions. Your brain will start recognizing patterns instead of memorizing isolated facts.\n\nThis method typically improves pharm performance by 35-50% within two weeks."
-                    ],
-
-                    anxiety: [
-                        "Test anxiety isn't a character flaw - it's a **cognitive performance disruption** that responds to specific interventions. I've developed protocols that reduce anxiety symptoms by 70% in most students.\n\nYour anxiety is telling me two things: 1) You're placing too much emotional weight on individual questions, and 2) Your cognitive confidence is lower than your actual knowledge level.\n\n**My Anxiety Control Protocol**: Use **Cognitive Interruption Technique** - when you feel panic rising, stop, take 3 deep breaths, say 'I know more than I think I know,' then restart the question. Practice this during every practice session.\n\nAlso implement **Strategic Question Reframing**: Instead of 'What if I get this wrong?' ask 'What does this question teach me about nursing priorities?'\n\n**Homework**: Do 20 practice questions while intentionally practicing anxiety management. Rate your anxiety 1-10 before and after each question. This builds anxiety tolerance while maintaining performance.",
-                        "I can tell you're experiencing **performance anxiety**, not knowledge anxiety. Your brain knows the content but stress hormones are interfering with recall and decision-making.\n\nLet me teach you my **Cognitive State Management System**: Before each practice session, do my **Confidence Calibration exercise**: List 3 things you know well about nursing, remind yourself of your clinical successes, then affirm 'I have the knowledge to succeed.'\n\nDuring questions, use **Strategic Breathing**: 4 counts in, 4 counts hold, 4 counts out. This optimizes oxygen to your prefrontal cortex where decision-making happens.\n\n**Critical insight**: Some anxiety actually improves performance when properly managed. We're not eliminating anxiety, we're channeling it into focused attention.\n\nPractice this during your next 30 questions. You should notice clearer thinking and faster decision-making within a few days."
-                    ],
-
-                    readiness: [
-                        "Readiness assessment requires **multidimensional analysis**, not just practice test scores. Let me evaluate your true readiness using my **7-Point Readiness Protocol**.\n\n**Content Readiness**: Are you consistently scoring 75%+ across ALL content areas? Any domain below 70% needs targeted intervention.\n\n**Cognitive Readiness**: Can you complete 145 questions without cognitive fatigue? Are you making decisions within 1.5 minutes per question?\n\n**Psychological Readiness**: Do you feel confident in your nursing judgment? Are you managing test anxiety effectively?\n\n**Strategic Readiness**: Can you consistently apply test-taking strategies without second-guessing?\n\nHere's my assessment: If you're scoring 75%+ consistently, completing practice tests without fatigue, and feeling confident in your clinical reasoning, you're likely ready. If any component is weak, we need 1-2 more weeks of targeted intervention.\n\n**Next step**: Take my comprehensive readiness assessment - 150 questions covering all domains. Your performance pattern will tell us exactly where you stand.",
-                        "True NCLEX readiness isn't about perfect scores - it's about **consistent competent performance** across multiple dimensions. Most students test too early because they focus only on content scores.\n\nMy **Readiness Indicators**: 1) Stable performance (scores don't fluctuate more than 10%), 2) Cognitive endurance (maintaining accuracy through 145+ questions), 3) Content coverage (no weak domains), 4) Strategic thinking (using systematic approaches), 5) Controlled anxiety (stress enhances rather than impairs performance).\n\n**The critical test**: Can you explain WHY your correct answers are correct and WHY your incorrect choices are wrong? This metacognitive awareness predicts NCLEX success better than raw scores.\n\nSchedule your exam when you can confidently say 'I understand nursing thinking patterns' rather than 'I hope I studied enough.'"
-                    ],
-
-                    ngn: [
-                        "NGN success requires **clinical reasoning architecture**, not content memorization. The new format evaluates your thinking process, and traditional prep methods won't work.\n\nLet me teach you my **NGN Clinical Judgment Framework**: The six operations aren't separate skills - they're a **cognitive sequence** that mirrors real nursing thinking.\n\n**Cue Recognition**: Train your brain to identify relevant vs. irrelevant data. Practice with complex scenarios, circle only information that impacts nursing care.\n\n**Cue Analysis**: Ask 'What does this tell me about the patient's condition?' Connect assessment findings to pathophysiology.\n\n**Hypothesis Formation**: Generate 2-3 possible explanations for what you're seeing. The NCLEX wants systematic differential thinking.\n\n**Priority Setting**: Use my **Safety-Impact Matrix** - which hypothesis poses the greatest immediate threat?\n\n**Intervention Planning**: Select actions that directly address your priority hypothesis.\n\n**Evaluation**: Determine if your interventions achieved the intended outcomes.\n\n**Practice method**: Use unfolding case studies, work through each step consciously until it becomes automatic.",
-                        "NGN represents the future of nursing assessment - it's evaluating **clinical judgment competency**, not factual recall. Your preparation needs to develop systematic thinking patterns.\n\nMy **NGN Mastery Protocol**: Stop practicing isolated questions. Start with **case-based reasoning scenarios** that require you to work through the complete clinical judgment process.\n\n**Key insight**: NGN questions have built-in cognitive scaffolding. Each part of the question guides you through the reasoning process. Learn to use this structure to your advantage.\n\n**Training approach**: Take one complex patient scenario. Work through it using my six-step framework. Then find 3 similar scenarios and apply the same process. This builds **pattern recognition** for clinical reasoning.\n\nMost students achieve NGN proficiency within 3-4 weeks of focused practice using systematic reasoning development rather than random question practice."
-                    ],
-
-                    repeat: [
-                        "As a repeat test-taker, you need **pattern correction**, not content review. My analysis of 1000+ repeat candidates shows specific failure patterns that predict success or continued struggle.\n\n**First**: We identify exactly why you didn't pass. Was it content gaps, test-taking strategy issues, anxiety interference, or clinical reasoning problems? Most repeat takers have 2-3 specific issues, not global knowledge deficits.\n\n**My Recovery Protocol**: 1) Diagnostic assessment to pinpoint failure patterns, 2) Targeted intervention on ONLY identified weaknesses, 3) Confidence rebuilding through systematic success experiences, 4) Test psychology management to eliminate anxiety interference.\n\n**Critical insight**: Repeat takers who use the same study methods get the same results. We're implementing a **completely different approach** based on your specific failure analysis.\n\n**Timeline**: Most repeat candidates achieve readiness in 4-6 weeks using my targeted methodology, compared to 8-12 weeks with traditional approaches.\n\nTell me about your previous testing experience - I'll identify your specific intervention needs.",
-                        "Repeat testing requires **strategic intervention**, not harder studying. You likely have adequate knowledge but need cognitive pattern correction and psychological reconstruction.\n\nMy **Repeat Success Framework**: \n\n**Phase 1 - Failure Analysis**: Identify the specific cognitive or emotional patterns that caused previous failure. This isn't about content you missed - it's about thinking patterns that led to wrong choices.\n\n**Phase 2 - Pattern Correction**: Implement targeted exercises to correct identified thinking errors. Most repeat failures stem from 3-4 specific mistake patterns.\n\n**Phase 3 - Confidence Reconstruction**: Rebuild testing confidence through progressive success experiences. Previous failure creates psychological barriers that interfere with performance.\n\n**Phase 4 - Performance Optimization**: Fine-tune test-taking psychology and strategic approaches for optimal performance.\n\n**Success rate**: 89% of repeat takers using my methodology pass on their next attempt, compared to 45% using traditional review methods."
-                    ],
-
-                    content: [
-                        "Content confusion usually indicates **conceptual fragmentation** rather than knowledge deficits. You know facts but can't connect them into clinical reasoning patterns.\n\nMy **Content Integration Method**: Stop studying isolated facts. Start building **knowledge networks** that connect pathophysiology → assessment → interventions → outcomes.\n\n**Example**: Instead of memorizing 'give oxygen for hypoxemia,' understand the complete picture: Why does hypoxemia occur? → How do we recognize it? → What interventions address the underlying cause? → How do we know our interventions worked?\n\n**Study technique**: For each condition you're struggling with, create a **Clinical Reasoning Map**: Patient presentation → Nursing priorities → Interventions → Expected outcomes → Potential complications.\n\nThis approach builds the kind of integrated understanding NCLEX tests, rather than isolated fact recall.\n\n**Practice method**: Choose one content area you find confusing. Build reasoning maps for 5 conditions in that area. Then do 20 questions focusing on that content. You'll notice improved application immediately.",
-                        "Content struggles often reflect **learning method mismatch** rather than cognitive deficits. Let me restructure your approach using evidence-based learning science.\n\n**My Content Mastery System**: \n\n**Active Retrieval**: Instead of re-reading notes, test yourself constantly. Can you explain concepts without looking? This builds robust memory networks.\n\n**Spaced Practice**: Review content in expanding intervals (1 day, 3 days, 1 week, 2 weeks). This creates durable learning.\n\n**Interleaved Practice**: Mix different topics within study sessions rather than blocking by subject. This improves discrimination and application.\n\n**Elaborative Integration**: Connect new information to existing knowledge. Ask 'How does this relate to what I already know?'\n\n**Application Focus**: For every fact you learn, practice applying it in 2-3 different scenarios.\n\nThis approach typically improves content retention by 60% and application ability by 40% compared to traditional review methods."
-                    ],
-
-                    strategy: [
-                        "Effective NCLEX strategy isn't about test-taking tricks - it's about **systematic clinical reasoning** applied consistently under testing conditions.\n\nMy **Strategic Framework**: \n\n**Question Analysis**: Read the question stem first, identify what they're really asking, then look at options. Most students read everything and get overwhelmed.\n\n**Option Evaluation**: Use systematic elimination based on safety, scope of practice, and nursing priorities rather than gut feelings.\n\n**Time Management**: Spend appropriate time on each question type. Simple recall questions: 45 seconds. Complex scenarios: 2.5 minutes. SATA: 2 minutes.\n\n**Confidence Calibration**: When you're 80% sure of an answer, move on. Perfect certainty is impossible and wastes cognitive resources.\n\n**Error Recovery**: If you realize you made an error, don't let it affect subsequent questions. Each question is independent.\n\n**Practice method**: Use these strategies during every practice session until they become automatic. Strategy application under pressure requires deliberate practice.",
-                        "Strategic NCLEX preparation requires **meta-cognitive development** - learning how to think about your thinking during the examination.\n\nMy **Cognitive Strategy System**: \n\n**Pre-question Protocol**: Before reading each question, take a breath and remind yourself 'I'm looking for the MOST appropriate nursing action.'\n\n**During-question Protocol**: Identify the patient's priority problem, eliminate options that don't address this problem, choose the safest remaining option.\n\n**Post-question Protocol**: Don't second-guess unless you identify a clear reasoning error. Move forward with confidence.\n\n**Anxiety Management**: If you feel overwhelmed, use my **Reset Technique**: Close your eyes for 3 seconds, take a deep breath, remind yourself of one thing you know for certain about nursing.\n\n**Strategic insight**: NCLEX rewards systematic thinking patterns, not perfect knowledge. Develop reliable reasoning processes that work under pressure."
-                    ],
-
-                    general: [
-                        "Let me analyze your situation and provide targeted recommendations based on my assessment of your specific needs and preparation goals.",
-                        "Based on what you're describing, I can identify several intervention opportunities that align with my proven methodology for NCLEX success.",
-                        "This represents an excellent opportunity to apply my diagnostic framework and develop a strategic approach tailored to your unique situation."
-                    ]
-                };
-            },
-
-            addPersonalityMarkers(response, analysis) {
-                const personalityElements = {
-                    authority: [
-                        "Based on my analysis of 10,000+ similar cases,",
-                        "My research demonstrates that",
-                        "I've developed specific protocols for this exact pattern:",
-                        "This aligns with my proprietary methodology:",
-                        "My data shows that students with this pattern typically"
-                    ],
-                    psychology: [
-                        "Your brain is processing this as",
-                        "This indicates a specific cognitive pattern where",
-                        "The psychological component here involves",
-                        "From a cognitive science perspective,",
-                        "Your confidence will improve once we address"
-                    ],
-                    motivation: [
-                        "You're closer to success than you realize.",
-                        "This is completely correctable with targeted intervention.",
-                        "I've seen this exact pattern resolve in 2-3 weeks.",
-                        "Your success probability just increased significantly.",
-                        "Once we fix this pattern, everything else becomes easier."
-                    ]
-                };
-
-                if (analysis.emotionalState === 'distressed') {
-                    response = this.addSupport(response);
-                } else if (analysis.emotionalState === 'positive') {
-                    response = this.addChallenge(response);
-                }
-
-                return response;
-            },
-
-            addSupport(response) {
-                const supportElements = [
-                    "I understand this feels overwhelming right now, but",
-                    "Take a breath - this is completely manageable.",
-                    "You're not alone in this struggle.",
-                    "I've helped thousands of students through exactly this situation."
-                ];
-                const support = supportElements[Math.floor(Math.random() * supportElements.length)];
-                return `${support} ${response}`;
-            },
-
-            addChallenge(response) {
-                const challengeElements = [
-                    "I can see you're building confidence, and now we can push further.",
-                    "Your positive attitude tells me you're ready for advanced strategies.",
-                    "This momentum is exactly what I like to see - let's leverage it."
-                ];
-                const challenge = challengeElements[Math.floor(Math.random() * challengeElements.length)];
-                return `${challenge} ${response}`;
-            },
-
-            addContinuityMarkers(response, context) {
-                if (context.conversationHistory.length > 0) {
-                    const continuityPhrases = [
-                        "Building on what we discussed earlier,",
-                        "Following up on your previous question,",
-                        "Now that we've identified your pattern,",
-                        "Based on our conversation so far,"
-                    ];
-                    const phrase = continuityPhrases[Math.floor(Math.random() * continuityPhrases.length)];
-                    return `${phrase} ${response}`;
-                }
-                return response;
-            },
-
-            customizeForTrack(response, track, analysis) {
-                const trackCustomizations = {
-                    'repeat': '\n\n**Repeat Taker Focus**: Remember, you have nursing knowledge - we\'re correcting specific thinking patterns that caused previous results.',
-                    'first-time': '\n\n**First-Timer Advantage**: Your fresh perspective allows us to build optimal cognitive patterns from the start.',
-                    'ngn': '\n\n**NGN Strategy**: This directly applies to clinical judgment scenarios you\'ll see on the exam.',
-                    'accelerated': '\n\n**Accelerated Protocol**: We\'re implementing intensive, high-yield interventions for rapid improvement.',
-                    'anxiety': '\n\n**Anxiety Management**: All recommendations include built-in confidence building and stress reduction components.'
-                };
-
-                return response + (trackCustomizations[track] || '');
-            }
-        };
-
-        // Enhanced chat system with live AI + fallback integration
-        class DrReynoldsChat {
-            constructor() {
-                this.session = new SessionManager();
-                this.isConnected = true;
-                this.isTyping = false;
-                this.initialize();
-            }
-
-            initialize() {
-                this.setupEventListeners();
-                this.updateConnectionStatus();
-                this.focusInput();
-            }
-
-            setupEventListeners() {
-                const chatInput = document.getElementById('chatInput');
-                const sendButton = document.getElementById('sendButton');
-                const prepTrack = document.getElementById('prepTrack');
-
-                chatInput.addEventListener('input', () => {
-                    chatInput.style.height = 'auto';
-                    chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
-                });
-
-                chatInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        this.sendMessage();
-                    }
-                });
-
-                sendButton.addEventListener('click', () => this.sendMessage());
-
-                prepTrack.addEventListener('change', (e) => {
-                    this.session.updatePrepTrack(e.target.value);
-                });
-
-                if ('vibrate' in navigator) {
-                    sendButton.addEventListener('click', () => {
-                        navigator.vibrate(25);
-                    });
-                }
-            }
-
-            async sendMessage() {
-                const chatInput = document.getElementById('chatInput');
-                const message = chatInput.value.trim();
-                
-                if (!message || this.isTyping) return;
-
-                this.removeWelcomeMessage();
-                this.addMessage(message, 'user');
-                this.session.addToHistory('user', message);
-                this.session.updateMessageCount();
-
-                chatInput.value = '';
-                chatInput.style.height = 'auto';
-                this.setInputState(false);
-                this.showTypingIndicator();
-
-                try {
-                    // Try live AI first
-                    const response = await this.callLiveAI(message);
-                    this.hideTypingIndicator();
-                    this.addMessage(response, 'dr');
-                    this.session.addToHistory('assistant', response);
-                    this.updateConnectionStatus(true);
-                } catch (error) {
-                    console.error('Live AI failed, using evidence-based fallback:', error);
-                    this.hideTypingIndicator();
+                if (progressElement && stats.total > 0) {
+                    const percentage = Math.round((stats.correct / stats.total) * 100);
+                    const progressBar = progressElement.querySelector('.progress-bar');
+                    const scoreSpan = progressElement.querySelector('.category-score');
                     
-                    // Use your detailed evidence-based responses as fallback
-                    const fallbackResponse = this.getEvidenceBasedFallback(message);
-                    this.addMessage(fallbackResponse, 'dr');
-                    this.session.addToHistory('assistant', fallbackResponse);
-                    this.updateConnectionStatus(false);
+                    progressBar.style.width = `${percentage}%`;
+                    scoreSpan.textContent = `${percentage}%`;
+                    
+                    // Update color based on performance
+                    if (percentage >= 80) {
+                        scoreSpan.style.color = 'var(--success)';
+                        progressBar.style.background = 'var(--success)';
+                    } else if (percentage >= 70) {
+                        scoreSpan.style.color = 'var(--warning)';
+                        progressBar.style.background = 'var(--warning)';
+                    } else {
+                        scoreSpan.style.color = 'var(--danger)';
+                        progressBar.style.background = 'var(--danger)';
+                    }
                 }
-
-                this.setInputState(true);
-                this.focusInput();
+            });
+            
+            // Update overall score card color
+            const scoreElement = document.getElementById('overallScore');
+            const scoreIcon = scoreElement.parentElement.querySelector('.progress-icon');
+            if (overallScore >= 80) {
+                scoreElement.style.color = 'var(--success)';
+                scoreIcon.style.background = 'rgba(16, 185, 129, 0.1)';
+                scoreIcon.style.color = 'var(--success)';
+            } else if (overallScore >= 70) {
+                scoreElement.style.color = 'var(--warning)';
+                scoreIcon.style.background = 'rgba(245, 158, 11, 0.1)';
+                scoreIcon.style.color = 'var(--warning)';
+            } else if (overallScore > 0) {
+                scoreElement.style.color = 'var(--danger)';
+                scoreIcon.style.background = 'rgba(239, 68, 68, 0.1)';
+                scoreIcon.style.color = 'var(--danger)';
             }
-
-            async callLiveAI(message) {
-                const response = await fetch('/.netlify/functions/reynolds-chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        prepTrack: this.session.data.prepTrack,
-                        messageCount: this.session.data.messageCount,
-                        sessionHistory: this.session.getRecentHistory(),
-                        studentName: this.session.data.studentName
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            
+            // Update study plan
+            updateStudyPlan();
+            
+            // Update question counter
+            updateQuestionCounter();
+        }
+        
+        function updateStudyPlan() {
+            const studyPlanContainer = document.getElementById('studyPlanContainer');
+            const focusAreasContainer = document.getElementById('focusAreasContainer');
+            
+            if (!studyPlanContainer || !focusAreasContainer) return;
+            
+            // Generate personalized study plan based on performance
+            const categoryPerformances = [];
+            Object.keys(userProgress.categoryStats).forEach(category => {
+                const stats = userProgress.categoryStats[category];
+                if (stats.total > 0) {
+                    const percentage = Math.round((stats.correct / stats.total) * 100);
+                    categoryPerformances.push({ category, percentage, total: stats.total });
                 }
-
-                const data = await response.json();
+            });
+            
+            // Sort categories by performance (worst first)
+            categoryPerformances.sort((a, b) => a.percentage - b.percentage);
+            
+            // Generate study plan
+            let studyPlanHTML = '';
+            
+            if (userProgress.totalAnswered === 0) {
+                studyPlanHTML = `
+                    <div class="study-item">
+                        <div class="study-item-icon" style="background: rgba(37, 99, 235, 0.1); color: var(--primary);">🚀</div>
+                        <div class="study-item-content">
+                            <div class="study-item-title">Get Started - Take Your First Practice Questions</div>
+                            <div class="study-item-description">Begin with a mixed set of questions to establish your baseline performance</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Current session summary
+                const overallScore = Math.round((userProgress.correctAnswers / userProgress.totalAnswered) * 100);
+                const sessionIcon = overallScore >= 80 ? '🎉' : overallScore >= 70 ? '👍' : '📚';
+                const sessionStatus = overallScore >= 80 ? 'Excellent Progress!' : overallScore >= 70 ? 'Good Work!' : 'Keep Practicing!';
                 
-                if (data.success === false || data.isError) {
-                    throw new Error(data.reply || 'API returned error');
-                }
-
-                return data.reply;
-            }
-
-            getEvidenceBasedFallback(message) {
-                // Use your original detailed response system when AI fails
-                const fallbackResponse = drReynoldsCore.getPersonalizedResponse(message, this.session.data);
-                
-                return `*[Dr. Reynolds - Evidence-Based Protocol Mode]*\n\n${fallbackResponse}\n\n*I'm temporarily using my core evidence-based protocols while reconnecting to advanced AI systems. The guidance above represents proven methodologies from my 20+ years of NCLEX coaching.*`;
-            }
-
-            addMessage(content, sender) {
-                const messagesContainer = document.getElementById('messagesContainer');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${sender}`;
-                
-                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const avatar = sender === 'dr' ? 'DR' : 'You';
-                
-                messageDiv.innerHTML = `
-                    <div class="message-avatar">${avatar}</div>
-                    <div class="message-content">
-                        <div class="message-text">${this.formatMessage(content)}</div>
-                        <div class="message-time">${time}</div>
+                studyPlanHTML += `
+                    <div class="study-item">
+                        <div class="study-item-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">${sessionIcon}</div>
+                        <div class="study-item-content">
+                            <div class="study-item-title">Current Session - ${sessionStatus}</div>
+                            <div class="study-item-description">Completed ${userProgress.totalAnswered} questions with ${overallScore}% accuracy (${userProgress.streak} current streak)</div>
+                        </div>
                     </div>
                 `;
                 
-                messagesContainer.appendChild(messageDiv);
-                this.scrollToBottom();
-                
-                setTimeout(() => {
-                    messageDiv.style.opacity = '1';
-                    messageDiv.style.transform = 'translateY(0)';
-                }, 100);
-            }
-
-            formatMessage(content) {
-                return content
-                    .replace(/\n\n/g, '</p><p>')
-                    .replace(/\n/g, '<br>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    .replace(/#{1,3}\s*(.*?)$/gm, '<h4>$1</h4>')
-                    .replace(/^<p>/, '')
-                    .replace(/<\/p>$/, '');
-            }
-
-            showTypingIndicator() {
-                this.isTyping = true;
-                const indicator = document.getElementById('typingIndicator');
-                indicator.classList.add('show');
-                this.scrollToBottom();
-            }
-
-            hideTypingIndicator() {
-                this.isTyping = false;
-                const indicator = document.getElementById('typingIndicator');
-                indicator.classList.remove('show');
-            }
-
-            removeWelcomeMessage() {
-                const welcome = document.getElementById('welcomeMessage');
-                if (welcome) {
-                    welcome.style.transform = 'translateY(-20px)';
-                    welcome.style.opacity = '0';
-                    setTimeout(() => welcome.remove(), 300);
-                }
-            }
-
-            setInputState(enabled) {
-                const chatInput = document.getElementById('chatInput');
-                const sendButton = document.getElementById('sendButton');
-                
-                chatInput.disabled = !enabled;
-                sendButton.disabled = !enabled;
-                
-                if (enabled) {
-                    chatInput.placeholder = "Describe your NCLEX challenge, study concerns, or specific questions...";
-                } else {
-                    chatInput.placeholder = "Dr. Reynolds is preparing her response...";
-                }
-            }
-
-            updateConnectionStatus(connected = true) {
-                this.isConnected = connected;
-                const statusIndicator = document.getElementById('statusIndicator');
-                const connectionStatus = document.getElementById('connectionStatus');
-                
-                if (connected) {
-                    connectionStatus.innerHTML = '🟢 Connected to Dr. Reynolds AI';
-                    statusIndicator.className = 'status-indicator online';
-                } else {
-                    connectionStatus.innerHTML = '🟡 Evidence-Based Protocol Mode';
-                    statusIndicator.className = 'status-indicator offline';
+                // Next recommended focus
+                if (categoryPerformances.length > 0) {
+                    const weakestCategory = categoryPerformances[0];
+                    const focusIcon = weakestCategory.percentage < 70 ? '🎯' : '⚡';
+                    const focusColor = weakestCategory.percentage < 70 ? 'var(--danger)' : 'var(--warning)';
+                    const focusBackground = weakestCategory.percentage < 70 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)';
+                    
+                    studyPlanHTML += `
+                        <div class="study-item">
+                            <div class="study-item-icon" style="background: ${focusBackground}; color: ${focusColor};">${focusIcon}</div>
+                            <div class="study-item-content">
+                                <div class="study-item-title">Priority Focus - ${weakestCategory.category}</div>
+                                <div class="study-item-description">Current score: ${weakestCategory.percentage}% - Practice 10-15 more questions in this area</div>
+                            </div>
+                        </div>
+                    `;
                 }
                 
-                statusIndicator.classList.add('show');
-                setTimeout(() => {
-                    statusIndicator.classList.remove('show');
-                }, 3000);
+                // Continue practicing
+                studyPlanHTML += `
+                    <div class="study-item">
+                        <div class="study-item-icon" style="background: rgba(37, 99, 235, 0.1); color: var(--primary);">📝</div>
+                        <div class="study-item-content">
+                            <div class="study-item-title">Continue Practice Session</div>
+                            <div class="study-item-description">Keep answering questions to improve your overall score and build confidence</div>
+                        </div>
+                    </div>
+                `;
             }
-
-            focusInput() {
-                setTimeout(() => {
-                    document.getElementById('chatInput').focus();
-                }, 100);
-            }
-
-            scrollToBottom() {
-                const container = document.getElementById('messagesContainer');
-                container.scrollTop = container.scrollHeight;
-            }
-        }
-
-        // Quick start functionality
-        function quickStart(message) {
-            const chatInput = document.getElementById('chatInput');
-            chatInput.value = message;
-            chat.sendMessage();
-        }
-
-        // Initialize chat system
-        let chat;
-        document.addEventListener('DOMContentLoaded', () => {
-            chat = new DrReynoldsChat();
             
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-                    chat.sendMessage();
+            studyPlanContainer.innerHTML = studyPlanHTML;
+            
+            // Generate focus areas
+            let focusAreasHTML = '';
+            
+            if (categoryPerformances.length === 0) {
+                focusAreasHTML = `
+                    <div style="padding: 1rem; background: rgba(37, 99, 235, 0.1); border-radius: 8px; border-left: 4px solid var(--primary);">
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Start Your NCLEX Journey</h4>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Answer some practice questions to get personalized recommendations based on your performance.</p>
+                    </div>
+                `;
+            } else {
+                // Group categories by performance level
+                const highPriority = categoryPerformances.filter(cat => cat.percentage < 70);
+                const mediumPriority = categoryPerformances.filter(cat => cat.percentage >= 70 && cat.percentage < 80);
+                const strengths = categoryPerformances.filter(cat => cat.percentage >= 80);
+                
+                // High priority areas
+                highPriority.forEach(cat => {
+                    const tips = getCategoryTips(cat.category);
+                    focusAreasHTML += `
+                        <div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 4px solid var(--danger);">
+                            <h4 style="color: var(--danger); margin-bottom: 0.5rem;">High Priority: ${cat.category}</h4>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Your score is ${cat.percentage}% (${cat.total} questions). ${tips}</p>
+                        </div>
+                    `;
+                });
+                
+                // Medium priority areas
+                mediumPriority.forEach(cat => {
+                    const tips = getCategoryTips(cat.category);
+                    focusAreasHTML += `
+                        <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid var(--warning);">
+                            <h4 style="color: var(--warning); margin-bottom: 0.5rem;">Medium Priority: ${cat.category}</h4>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Your score is ${cat.percentage}% (${cat.total} questions). ${tips}</p>
+                        </div>
+                    `;
+                });
+                
+                // Strengths
+                if (strengths.length > 0) {
+                    const strengthsList = strengths.map(cat => `${cat.category} (${cat.percentage}%)`).join(', ');
+                    focusAreasHTML += `
+                        <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid var(--success);">
+                            <h4 style="color: var(--success); margin-bottom: 0.5rem;">Your Strengths</h4>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Great work in: ${strengthsList}. Maintain with light review.</p>
+                        </div>
+                    `;
                 }
+            }
+            
+            focusAreasContainer.innerHTML = focusAreasHTML;
+        }
+        
+        function getCategoryTips(category) {
+            const tips = {
+                'Pharmacology': 'Focus on drug classifications, side effects, and nursing considerations.',
+                'Mental Health': 'Review therapeutic communication and crisis intervention techniques.',
+                'Pediatrics': 'Study growth & development milestones and pediatric-specific care.',
+                'Medical-Surgical': 'Practice prioritization and delegation scenarios.',
+                'Maternity': 'Review labor stages and postpartum complications.',
+                'Community Health': 'Focus on health promotion and disease prevention strategies.'
+            };
+            return tips[category] || 'Continue practicing questions in this area.';
+        }
+        
+        function showUpgradePrompt() {
+            const upgradeModal = document.createElement('div');
+            upgradeModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                padding: 2rem;
+            `;
+            
+            upgradeModal.innerHTML = `
+                <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; text-align: center; position: relative;">
+                    <button onclick="this.parentElement.parentElement.remove()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">×</button>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🚀</div>
+                    <h3 style="margin-bottom: 1rem; color: var(--text);">You've reached your question limit!</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem;">You've completed all ${userSubscription.questionsRemaining} free questions. Upgrade to Premium for unlimited practice!</p>
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="btn btn-secondary">Maybe Later</button>
+                        <button onclick="upgradeToPremium()" class="btn" style="background: var(--accent); color: white;">Upgrade Now</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(upgradeModal);
+        }
+        
+        async function upgradeToPremium() {
+            try {
+                // Show loading state
+                const upgradeButtons = document.querySelectorAll('button[onclick="upgradeToPremium()"]');
+                upgradeButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.innerHTML = '⏳ Processing...';
+                });
+                
+                // Create checkout session on your backend
+                const response = await fetch(`${BACKEND_URL}/create-checkout-session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        priceId: 'price_YOUR_STRIPE_PRICE_ID', // Replace with your Stripe Price ID
+                        successUrl: window.location.href + '?success=true',
+                        cancelUrl: window.location.href + '?canceled=true',
+                        customerEmail: null, // You can collect email if needed
+                        trialPeriodDays: 7 // 7-day free trial
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create checkout session');
+                }
+                
+                const session = await response.json();
+                
+                // Redirect to Stripe Checkout
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id
+                });
+                
+                if (result.error) {
+                    throw new Error(result.error.message);
+                }
+                
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('❌ Payment Error\n\nSorry, there was an issue processing your payment. Please try again or contact support.');
+                
+                // Reset button states
+                const upgradeButtons = document.querySelectorAll('button[onclick="upgradeToPremium()"]');
+                upgradeButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.innerHTML = btn.innerHTML.includes('Start') ? 'Start 7-Day Free Trial' : 'Upgrade Now';
+                });
+            }
+        }
+        
+        // Check for successful payment on page load
+        function checkPaymentStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.get('success') === 'true') {
+                // Payment successful - activate premium
+                activatePremiumAccount();
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Show success message
+                showPaymentSuccessModal();
+            } else if (urlParams.get('canceled') === 'true') {
+                // Payment canceled
+                alert('💳 Payment Canceled\n\nNo worries! You can upgrade to Premium anytime to unlock unlimited questions.');
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+        
+        function activatePremiumAccount() {
+            userSubscription.isPremium = true;
+            userSubscription.questionsRemaining = Infinity;
+            userSubscription.trialDaysLeft = 7; // Start with 7-day trial
+            
+            // Save to localStorage for persistence
+            localStorage.setItem('userSubscription', JSON.stringify(userSubscription));
+            
+            // Update UI
+            updatePremiumStatus();
+        }
+        
+        function showPaymentSuccessModal() {
+            const successModal = document.createElement('div');
+            successModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                padding: 2rem;
+            `;
+            
+            successModal.innerHTML = `
+                <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; text-align: center; position: relative;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+                    <h2 style="margin-bottom: 1rem; color: var(--success);">Welcome to Premium!</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Your 7-day free trial has started. You now have access to:</p>
+                    <div style="text-align: left; margin-bottom: 2rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span style="color: var(--success);">✓</span>
+                            <span>Unlimited practice questions</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span style="color: var(--success);">✓</span>
+                            <span>Detailed explanations for every answer</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span style="color: var(--success);">✓</span>
+                            <span>Advanced performance analytics</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="color: var(--success);">✓</span>
+                            <span>Personalized study plans</span>
+                        </div>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove(); showTab('practice');" class="btn" style="background: var(--success); color: white; width: 100%;">Start Practicing Now!</button>
+                </div>
+            `;
+            
+            document.body.appendChild(successModal);
+        }
+        
+        function updatePremiumStatus() {
+            // Update the upgrade tab button
+            const upgradeTab = document.querySelector('[onclick="showTab(\'upgrade\')"]');
+            if (userSubscription.isPremium) {
+                upgradeTab.innerHTML = '👑 Premium';
+                upgradeTab.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            }
+            
+            // Update question counter in practice tab
+            updateQuestionCounter();
+        }
+        
+        function updateQuestionCounter() {
+            const questionNumber = document.getElementById('questionNumber');
+            if (userSubscription.isPremium) {
+                questionNumber.textContent = `Question ${currentQuestion} • Premium: Unlimited`;
+            } else {
+                const remaining = Math.max(0, userSubscription.questionsRemaining - userProgress.totalAnswered);
+                questionNumber.textContent = `Question ${currentQuestion} • ${remaining} questions left`;
+            }
+        }
+        
+        function generateMoreQuestions() {
+            // In a real app, this would fetch more questions from a database
+            // For demo purposes, we'll cycle through existing questions with variations
+            const baseQuestion = questions[Math.floor(Math.random() * questions.length)];
+            
+            // Add a variation marker to show it's a new question
+            const newQuestion = {
+                ...baseQuestion,
+                question: `[Premium Question] ${baseQuestion.question}`,
+            };
+            
+            questions.push(newQuestion);
+            totalQuestions = questions.length;
+        }
+
+        // Add some interactive feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the app
+            initializeApp();
+            
+            // Add hover effects to cards
+            document.querySelectorAll('.progress-card, .study-item').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'var(--shadow)';
+                });
             });
         });
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9779470c15883105',t:'MTc1NjYwOTIyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
