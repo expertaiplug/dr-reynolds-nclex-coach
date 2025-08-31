@@ -1,0 +1,7 @@
+{
+  "name": "dr-reynolds-coach",
+  "private": true,
+  "dependencies": {
+    "stripe": "^16.0.0"
+  }
+}
