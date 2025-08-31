@@ -43,8 +43,7 @@ exports.handler = async (event) => {
       };
     }
     const customerId = customers.data[0].id;
-
-    const origin = new URL(event.headers.origin || 'https://drreynoldscoach.netlify.app').origin;
+    const origin = new URL((event.headers && event.headers.origin) || 'https://drreynoldscoach.netlify.app').origin;
     const returnUrl = process.env.RETURN_URL || origin;
 
     const session = await stripe.billingPortal.sessions.create({
@@ -57,3 +56,11 @@ exports.handler = async (event) => {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({ url: session.url })
     };
+  } catch (err) {
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: 'Failed to create portal session', details: err.message })
+    };
+  }
+};
