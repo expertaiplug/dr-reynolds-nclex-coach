@@ -1,39 +1,85 @@
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-  const STRIPE_PUBLISHABLE_KEY = 'pk_live_YOUR_ACTUAL_KEY';
-  const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-  window.BACKEND_URL = 'https://YOUR_SITE_NAME.netlify.app/.netlify/functions';
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-  document.addEventListener('click', async (event) => {
-    const btn = event.target.closest('[data-upgrade="premium"]');
-    if (!btn) return;
+exports.handler = async (event, context) => {
+  // Handle CORS for preflight requests
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+      },
+      body: ''
+    };
+  }
 
-    btn.disabled = true;
-    const originalLabel = btn.textContent;
-    btn.textContent = '⏳ Processing…';
+  // Only allow POST requests
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ error: 'Method not allowed' })
+    };
+  }
 
-    try {
-      const response = await fetch(`${window.BACKEND_URL}/create-checkout-session`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          priceId: 'price_1S22ULGdLQZ5sGelD8tanK8r',
-          successUrl: window.location.origin + '?success=true',
-          cancelUrl: window.location.origin + '?canceled=true',
-          trialPeriodDays: 7
+  try {
+    // Parse the request body
+    const { priceId, successUrl, cancelUrl, trialPeriodDays } = JSON.parse(event.body || '{}');
+
+    // Validate required fields
+    if (!priceId || !successUrl || !cancelUrl) {
+      return {
+        statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          error: 'Missing required fields: priceId, successUrl, cancelUrl' 
         })
-      });
-      
-      const { id } = await response.json();
-      if (!id) throw new Error('No session ID returned');
-
-      const result = await stripe.redirectToCheckout({ sessionId: id });
-      if (result.error) throw result.error;
-    } catch (err) {
-      alert('Payment error: ' + err.message);
-      btn.disabled = false;
-      btn.textContent = originalLabel;
+      };
     }
-  });
-</script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9779ab7b6455d7cc',t:'MTc1NjYxMzMzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      line_items: [{
+        price: priceId,
+        quantity: 1,
+      }],
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      subscription_data: trialPeriodDays ? {
+        trial_period_days: trialPeriodDays
+      } : undefined,
+    });
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: session.id })
+    };
+
+  } catch (error) {
+    console.error('Stripe error:', error);
+    
+    return {
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 
+        error: 'Failed to create checkout session',
+        details: error.message 
+      })
+    };
+  }
+};
